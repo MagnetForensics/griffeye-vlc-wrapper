@@ -1,0 +1,14 @@
+﻿<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>Griffeye.VlcWrapper</id>
+    <version>1.0.0</version>
+    <authors>Adam Sällergård, Robin Gustavsson</authors>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Griffeye libVLC Wrapper</description>
+  </metadata>
+  <files>
+    <file src="Griffeye.VlcWrapper.targets" target="build" />
+    <file src="..\artifacts\publish\Griffeye.VlcWrapper.exe" target="build" />
+  </files>
+</package>

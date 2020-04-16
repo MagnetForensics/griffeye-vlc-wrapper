@@ -1,0 +1,42 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29905.134
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Griffeye.VlcWrapper", "Griffeye.VlcWrapper\Griffeye.VlcWrapper.csproj", "{75D01FF7-082E-4944-96AA-C162A6C8F26A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Griffeye.VideoPlayerContract", "Griffeye.VideoPlayerContract\Griffeye.VideoPlayerContract.csproj", "{8695EA34-1ED5-4C22-94D8-DC09E1F97D46}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{57638F62-A764-4270-8833-272208554555}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Griffeye.VlcWrapper.Tests", "Griffeye.VlcWrapper.Tests\Griffeye.VlcWrapper.Tests.csproj", "{97DEEE81-034A-4153-95EB-9221923A5AFB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{75D01FF7-082E-4944-96AA-C162A6C8F26A}.Debug|x64.ActiveCfg = Debug|x64
+		{75D01FF7-082E-4944-96AA-C162A6C8F26A}.Debug|x64.Build.0 = Debug|x64
+		{75D01FF7-082E-4944-96AA-C162A6C8F26A}.Release|x64.ActiveCfg = Release|x64
+		{75D01FF7-082E-4944-96AA-C162A6C8F26A}.Release|x64.Build.0 = Release|x64
+		{8695EA34-1ED5-4C22-94D8-DC09E1F97D46}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{8695EA34-1ED5-4C22-94D8-DC09E1F97D46}.Debug|x64.Build.0 = Debug|Any CPU
+		{8695EA34-1ED5-4C22-94D8-DC09E1F97D46}.Release|x64.ActiveCfg = Release|Any CPU
+		{8695EA34-1ED5-4C22-94D8-DC09E1F97D46}.Release|x64.Build.0 = Release|Any CPU
+		{97DEEE81-034A-4153-95EB-9221923A5AFB}.Debug|x64.ActiveCfg = Debug|x64
+		{97DEEE81-034A-4153-95EB-9221923A5AFB}.Debug|x64.Build.0 = Debug|x64
+		{97DEEE81-034A-4153-95EB-9221923A5AFB}.Release|x64.ActiveCfg = Release|Any CPU
+		{97DEEE81-034A-4153-95EB-9221923A5AFB}.Release|x64.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{97DEEE81-034A-4153-95EB-9221923A5AFB} = {57638F62-A764-4270-8833-272208554555}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {BDC114A0-3B23-408D-9ED2-E1A8FE184ABC}
+	EndGlobalSection
+EndGlobal

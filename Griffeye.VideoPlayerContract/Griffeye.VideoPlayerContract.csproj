@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <RootNamespace>Griffeye.VideoPlayerContract</RootNamespace>
+        <Platforms>AnyCPU;x64</Platforms>
+        <RepositoryUrl>https://github.com/griffeye/videoplayer</RepositoryUrl>
+        <PackageProjectUrl>https://github.com/griffeye/videoplayer</PackageProjectUrl>
+        <Company>Griffeye Technologies</Company>
+        <Product>VideoPlayerContract</Product>
+        <Authors>Robin Gustavsson, Adam Sällergård</Authors>
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
+        <PackageLicenseExpression></PackageLicenseExpression>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="protobuf-net" Version="2.4.4" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="LICENSE">
+        <Pack>True</Pack>
+        <PackagePath></PackagePath>
+      </None>
+    </ItemGroup>
+
+</Project>
