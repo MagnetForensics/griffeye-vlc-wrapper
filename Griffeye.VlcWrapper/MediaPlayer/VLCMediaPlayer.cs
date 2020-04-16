@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -33,20 +32,18 @@ namespace Griffeye.VlcWrapper.MediaPlayer
             this.logger = logger;
             Core.Initialize();
             localFileStreamClient = new Client();
-            library = new LibVLC(new[]
-                {
-                    "--no-video-title-show",            /* no filename displayed          */
-                    "--no-stats",                       /* no stats                       */
-                    "--no-sub-autodetect-file",         /* we don't want subtitles        */
-                    "--no-snapshot-preview",
-                    "--intf", "dummy",
-                    "--no-spu",
-                    "--no-osd",
-                    "--no-lua",
-                    // debug options below
-                    "--quiet-synchro",
-                    "-vvv"
-                });
+            library = new LibVLC(
+                "--no-video-title-show",
+                "--no-stats",
+                "--no-sub-autodetect-file",
+                "--no-snapshot-preview",
+                "--intf",
+                "dummy",
+                "--no-spu",
+                "--no-osd",
+                "--no-lua",
+                "--quiet-synchro",
+                "-vvv");
             library.Log += Library_Log;
             mediaPlayer = new LibVLCSharp.Shared.MediaPlayer(library)
             {
@@ -59,20 +56,47 @@ namespace Griffeye.VlcWrapper.MediaPlayer
             mediaPlayer.TimeChanged += (sender, args) =>
             {
                 TimeChanged?.Invoke(this, args);
-                if (!aspectRationSet && mediaPlayer.VideoTrack != -1 && mediaPlayer.Media.Tracks[mediaPlayer.VideoTrack].Data.Video.Height != 0)
-                {
-                    aspectRationSet = true;
-                    var videoData = mediaPlayer.Media.Tracks[mediaPlayer.VideoTrack].Data.Video;
-                    var ar = (float)videoData.Width / videoData.Height;
-                    if (videoData.SarDen != 0)
-                    {
-                        ar *= (float)videoData.SarNum / videoData.SarDen;
-                    }
-                    AspectRatioChanged?.Invoke(this, ar);
-                }
-            };
-            mediaPlayer.LengthChanged += (sender, args) => LengthChanged?.Invoke(this, args);
+                if (aspectRationSet || mediaPlayer.VideoTrack == -1) {return;}
+                
+                aspectRationSet = true;
 
+                uint x = 0;
+                uint y = 0;
+                float aspectR = 1;
+                var canVideoSize = mediaPlayer.Size(0, ref x, ref y);
+                
+                if (!canVideoSize) { return; }
+                
+                var tracks = mediaPlayer.Media.Tracks;
+
+                foreach (var track in tracks)
+                {
+                    if (track.TrackType != TrackType.Video) continue;
+                    
+                    var orientation = track.Data.Video.Orientation;
+
+                    // It is rotated
+                    if (orientation == VideoOrientation.RightTop)
+                    {
+                        aspectR = (float)y / x;
+                    }
+                    else
+                    {
+                        aspectR = (float)x / y;
+                    }
+
+                    if (track.Data.Video.SarDen != 0)
+                    {
+                        aspectR *= (float) track.Data.Video.SarNum / track.Data.Video.SarDen;
+                    }
+
+                    break;
+                }
+                
+                AspectRatioChanged?.Invoke(this, aspectR);
+            };
+            
+            mediaPlayer.LengthChanged += (sender, args) => LengthChanged?.Invoke(this, args);
         }
 
         private void Library_Log(object sender, LogEventArgs e)
