@@ -63,7 +63,6 @@ Task("Pack-Contract")
         OutputDirectory = artifactsDir
     };
     DotNetCorePack(contractProject, packSettings);
-
 });
 
 Task("Pack-Wrapper")
