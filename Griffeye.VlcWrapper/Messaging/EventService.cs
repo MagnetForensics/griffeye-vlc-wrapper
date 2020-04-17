@@ -26,8 +26,8 @@ namespace Griffeye.VlcWrapper.Messaging
             mediaPlayer.LengthChanged += (s, a) => messageSerializer
                 .SerializeWithLengthPrefix(eventStream, new DurationEvent(a.Length / 1000f), PrefixStyle.Base128);
 
-            mediaPlayer.AspectRatioChanged += (s, a) => messageSerializer
-                .SerializeWithLengthPrefix(eventStream, new AspectRatioEvent(a), PrefixStyle.Base128);
+            mediaPlayer.MediaInfoChanged += (s, a) => messageSerializer
+                .SerializeWithLengthPrefix(eventStream, new MediaInfoEvent(a.AspectRatio, a.VideoOrientation), PrefixStyle.Base128);
         }
     }
 }

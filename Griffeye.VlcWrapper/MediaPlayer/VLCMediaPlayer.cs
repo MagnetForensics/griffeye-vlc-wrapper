@@ -25,7 +25,7 @@ namespace Griffeye.VlcWrapper.MediaPlayer
         public event EventHandler<EventArgs> EndReached;
         public event EventHandler<MediaPlayerTimeChangedEventArgs> TimeChanged;
         public event EventHandler<MediaPlayerLengthChangedEventArgs> LengthChanged;
-        public event EventHandler<float> AspectRatioChanged;
+        public event EventHandler<MediaInfo> MediaInfoChanged;
 
         public VLCMediaPlayer(InputData inputData, ILogger<VLCMediaPlayer> logger)
         {
@@ -62,41 +62,43 @@ namespace Griffeye.VlcWrapper.MediaPlayer
 
                 uint x = 0;
                 uint y = 0;
-                float aspectR = 1;
+                float aspectRatio = 1;
                 var canVideoSize = mediaPlayer.Size(0, ref x, ref y);
                 
                 if (!canVideoSize) { return; }
                 
-                var tracks = mediaPlayer.Media.Tracks;
+                var videoTrack = mediaPlayer.Media.Tracks.FirstOrDefault(track => track.TrackType == TrackType.Video);
+                var orientation = videoTrack.Data.Video.Orientation;
 
-                foreach (var track in tracks)
+                // It is rotated
+                if (IsFlipped(orientation))
                 {
-                    if (track.TrackType != TrackType.Video) continue;
-                    
-                    var orientation = track.Data.Video.Orientation;
-
-                    // It is rotated
-                    if (orientation == VideoOrientation.RightTop)
-                    {
-                        aspectR = (float)y / x;
-                    }
-                    else
-                    {
-                        aspectR = (float)x / y;
-                    }
-
-                    if (track.Data.Video.SarDen != 0)
-                    {
-                        aspectR *= (float) track.Data.Video.SarNum / track.Data.Video.SarDen;
-                    }
-
-                    break;
+                    aspectRatio = (float) y / x;
                 }
-                
-                AspectRatioChanged?.Invoke(this, aspectR);
+                else
+                {
+                    aspectRatio = (float) x / y;
+                }
+
+                if (videoTrack.Data.Video.SarDen != 0)
+                {
+                    aspectRatio *= (float) videoTrack.Data.Video.SarNum / videoTrack.Data.Video.SarDen;
+                }
+
+                MediaInfoChanged?.Invoke(this, new MediaInfo
+                {
+                    VideoOrientation = orientation.ToString(), AspectRatio = aspectRatio
+                });
             };
             
             mediaPlayer.LengthChanged += (sender, args) => LengthChanged?.Invoke(this, args);
+        }
+
+        private static bool IsFlipped(VideoOrientation orientation)
+        {
+            return orientation == VideoOrientation.RightTop ||
+                   orientation == VideoOrientation.LeftBottom ||
+                   orientation == VideoOrientation.RightBottom;
         }
 
         private void Library_Log(object sender, LogEventArgs e)
@@ -147,7 +149,7 @@ namespace Griffeye.VlcWrapper.MediaPlayer
         {
             // reset if not muted
             if (audioTrackId != -1) { audioTrackId = null; }
-            // recalculate aspectratio
+            // recalculate aspect ratio
             aspectRationSet = false;
 
             if (type == StreamType.LocalFileStream)
@@ -181,11 +183,8 @@ namespace Griffeye.VlcWrapper.MediaPlayer
         {
             var currentVideoTrack = mediaPlayer.VideoTrack;
 
-            if (currentVideoTrack == -1)
-            {
-                return false;
-            }
-            
+            if (currentVideoTrack == -1) { return false; }
+
             mediaPlayer.TakeSnapshot((uint)numberOfVideoOutput, filePath, (uint)width, (uint)height);
 
             return true;

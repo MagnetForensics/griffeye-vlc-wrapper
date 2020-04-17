@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Griffeye.VideoPlayerContract.Enums;
+using Griffeye.VlcWrapper.Models;
 using LibVLCSharp.Shared;
 
 namespace Griffeye.VlcWrapper.MediaPlayer
@@ -10,7 +11,7 @@ namespace Griffeye.VlcWrapper.MediaPlayer
         event EventHandler<EventArgs> EndReached;
         event EventHandler<MediaPlayerTimeChangedEventArgs> TimeChanged;
         event EventHandler<MediaPlayerLengthChangedEventArgs> LengthChanged;
-        event EventHandler<float> AspectRatioChanged;
+        event EventHandler<MediaInfo> MediaInfoChanged;
 
         public void ConnectLocalFileStream(string pipeName);
         void Play();
