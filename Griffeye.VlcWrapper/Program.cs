@@ -24,7 +24,7 @@ namespace Griffeye.VlcWrapper
             
             if (input.AttachDebugger) {Debugger.Launch(); }
             
-            Log.Logger = new LoggerConfiguration()
+           Log.Logger = new LoggerConfiguration()
                 .ReadFrom.Configuration(config)
                 .CreateLogger();
 
@@ -47,7 +47,7 @@ namespace Griffeye.VlcWrapper
         private static IConfiguration SetupConfiguration(string[] args)
         {
             return new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json")
+                .AddJsonFile("appsettings.json", optional: false)
                 .AddCommandLine(args)
                 .Build();
         }

@@ -43,7 +43,7 @@ namespace Griffeye.VlcWrapper.MediaPlayer
                 "--no-osd",
                 "--no-lua",
                 "--quiet-synchro",
-                "-vvv");
+                "-v");
             library.Log += Library_Log;
             mediaPlayer = new LibVLCSharp.Shared.MediaPlayer(library)
             {
@@ -185,7 +185,18 @@ namespace Griffeye.VlcWrapper.MediaPlayer
 
             if (currentVideoTrack == -1) { return false; }
 
-            mediaPlayer.TakeSnapshot((uint)numberOfVideoOutput, filePath, (uint)width, (uint)height);
+            using (var mre = new ManualResetEventSlim())
+            {
+                mediaPlayer.SnapshotTaken += MediaPlayerOnSnapshotTaken;
+                mediaPlayer.TakeSnapshot((uint) numberOfVideoOutput, filePath, (uint) width, (uint) height);
+                mre.Wait();
+                mediaPlayer.SnapshotTaken -= MediaPlayerOnSnapshotTaken;
+                
+                void MediaPlayerOnSnapshotTaken(object? sender, MediaPlayerSnapshotTakenEventArgs e)
+                {
+                    mre.Set();
+                }
+            }
 
             return true;
         }
