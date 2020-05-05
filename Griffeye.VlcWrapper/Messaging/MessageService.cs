@@ -11,27 +11,27 @@ namespace Griffeye.VlcWrapper.Messaging
     {
         private readonly ILogger<MessageService> logger;
         private readonly IResponseService responseService;
-        private readonly IRequestService requestService;
-        private readonly IEventService eventService;
+        private readonly IRequestService requestService;      
         private readonly IMediaPlayer mediaPlayer;
 
         public MessageService(ILogger<MessageService> logger, IResponseService responseService,
-            IRequestService requestService, IEventService eventService, IMediaPlayer mediaPlayer)
+            IRequestService requestService, IMediaPlayer mediaPlayer)
         {
             this.logger = logger;
             this.responseService = responseService;
             this.requestService = requestService;
-            this.eventService = eventService;
             this.mediaPlayer = mediaPlayer;
         }
 
         public bool Process(BaseRequest message, Stream eventStream, Stream outStream)
         {
-            eventService.Subscribe(mediaPlayer, eventStream);
-            
             try
             {
-                if (requestService.IsQuitMessage(message)) { return true; }
+                if (requestService.IsQuitMessage(message)) 
+                {
+                    responseService.ReturnEmptyResponse(outStream, message);
+                    return true; 
+                }
                 if (requestService.CanHandleMessage(mediaPlayer, message, outStream)) { return false; }
 
                 logger.LogWarning($"Invalid message type: {message.GetType()}");

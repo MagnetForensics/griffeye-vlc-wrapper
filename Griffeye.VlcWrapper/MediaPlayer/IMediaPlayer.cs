@@ -9,9 +9,14 @@ namespace Griffeye.VlcWrapper.MediaPlayer
     public interface IMediaPlayer
     {
         event EventHandler<EventArgs> EndReached;
-        event EventHandler<MediaPlayerTimeChangedEventArgs> TimeChanged;
+        event EventHandler<long> TimeChanged;
         event EventHandler<MediaPlayerLengthChangedEventArgs> LengthChanged;
-        event EventHandler<MediaInfo> MediaInfoChanged;
+        event EventHandler<VideoInfo> VideoInfoChanged;
+        event EventHandler<EventArgs> Playing;
+        event EventHandler<EventArgs> Paused;
+        event EventHandler<MediaPlayerVolumeChangedEventArgs> VolumeChanged;
+        event EventHandler<EventArgs> Unmuted;
+        event EventHandler<EventArgs> Muted;
 
         public void ConnectLocalFileStream(string pipeName);
         void Play();

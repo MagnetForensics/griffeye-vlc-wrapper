@@ -2,16 +2,19 @@
 using Griffeye.VideoPlayerContract.Messages.Requests;
 using Griffeye.VlcWrapper.MediaPlayer;
 using Griffeye.VlcWrapper.Messaging.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace Griffeye.VlcWrapper.Messaging
 {
     public class RequestService : IRequestService
     {
         private readonly IResponseService responseService;
+        private readonly ILogger<RequestService> logger;
 
-        public RequestService(IResponseService responseService)
+        public RequestService(IResponseService responseService, ILogger<RequestService> logger)
         {
             this.responseService = responseService;
+            this.logger = logger;
         }
 
         public bool IsQuitMessage(BaseRequest message)
@@ -21,24 +24,12 @@ namespace Griffeye.VlcWrapper.Messaging
 
         public bool CanHandleMessage(IMediaPlayer mediaPlayer, BaseRequest message, Stream outStream)
         {
-            return ExecuteNoResponseMessage(mediaPlayer, message) ||
-                   ExecuteResultResponse(mediaPlayer, message, outStream) ||
+            var result = ExecuteResultResponse(mediaPlayer, message, outStream) ||
                    ExecuteEmptyResponse(mediaPlayer, message, outStream);
-        }
 
-        private static bool ExecuteNoResponseMessage(IMediaPlayer mediaPlayer, BaseRequest message)
-        {
-            switch (message)
-            {
-                case SetVolume m: mediaPlayer.SetVolume(m.Volume); break;
-                case SetMute m: mediaPlayer.SetMute(m.IsMuted); break;
-                case SetPlaybackSpeed m: mediaPlayer.SetPlaybackSpeed(m.Speed); break;
-                case SetAudioTrack m: mediaPlayer.SetAudioTrack(m.TrackId); break;
-                case SetVideoTrack m: mediaPlayer.SetVideoTrack(m.TrackId); break;
-                default: return false;
-            }
-
-            return true;
+            logger.LogInformation($"Handled message of type: {message.GetType()} with sequence number: {message.SequenceNumber}");
+            
+            return result;
         }
 
         private bool ExecuteResultResponse(IMediaPlayer mediaPlayer, BaseRequest message, Stream outStream)
@@ -69,6 +60,11 @@ namespace Griffeye.VlcWrapper.Messaging
         {
             switch (message)
             {
+                case SetVolume m: mediaPlayer.SetVolume(m.Volume); break;
+                case SetMute m: mediaPlayer.SetMute(m.IsMuted); break;
+                case SetPlaybackSpeed m: mediaPlayer.SetPlaybackSpeed(m.Speed); break;
+                case SetAudioTrack m: mediaPlayer.SetAudioTrack(m.TrackId); break;
+                case SetVideoTrack m: mediaPlayer.SetVideoTrack(m.TrackId); break;
                 case Play _: mediaPlayer.Play(); break;
                 case Pause _: mediaPlayer.Pause(); break;
                 case LocalFileStreamDisconnect _: mediaPlayer.DisconnectLocalFileStream(); break;

@@ -1,9 +1,10 @@
-﻿using System.IO.Pipes;
+﻿using System.IO;
+using System.IO.Pipes;
 
 namespace Griffeye.VlcWrapper.Messaging.Interfaces
 {
     public interface IStreamFactory
     {
-        public AnonymousPipeClientStream CreateAnonymousPipeClientStream(PipeDirection direction, string pipeName);
+        public Stream CreateAnonymousPipeClientStream(PipeDirection direction, string pipeName);
     }
 }

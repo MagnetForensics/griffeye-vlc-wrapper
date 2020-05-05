@@ -1,7 +1,9 @@
-﻿namespace Griffeye.VlcWrapper.Messaging.Interfaces
+﻿using System.Threading.Tasks;
+
+namespace Griffeye.VlcWrapper.Messaging.Interfaces
 {
     public interface IMessageLoop
     {
-        public void Start();
+        public Task Start();
     }
 }

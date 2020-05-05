@@ -23,9 +23,14 @@ namespace Griffeye.VlcWrapper.MediaPlayer
         private bool aspectRationSet;
 
         public event EventHandler<EventArgs> EndReached;
-        public event EventHandler<MediaPlayerTimeChangedEventArgs> TimeChanged;
+        public event EventHandler<long> TimeChanged;
         public event EventHandler<MediaPlayerLengthChangedEventArgs> LengthChanged;
-        public event EventHandler<MediaInfo> MediaInfoChanged;
+        public event EventHandler<VideoInfo> VideoInfoChanged;
+        public event EventHandler<EventArgs> Playing;
+        public event EventHandler<EventArgs> Paused;
+        public event EventHandler<MediaPlayerVolumeChangedEventArgs> VolumeChanged;
+        public event EventHandler<EventArgs> Unmuted;
+        public event EventHandler<EventArgs> Muted;
 
         public VLCMediaPlayer(InputData inputData, ILogger<VLCMediaPlayer> logger)
         {
@@ -55,7 +60,7 @@ namespace Griffeye.VlcWrapper.MediaPlayer
             mediaPlayer.EndReached += (sender, args) => EndReached?.Invoke(this, args);
             mediaPlayer.TimeChanged += (sender, args) =>
             {
-                TimeChanged?.Invoke(this, args);
+                TimeChanged?.Invoke(this, args.Time);
                 if (aspectRationSet || mediaPlayer.VideoTrack == -1) {return;}
                 
                 aspectRationSet = true;
@@ -85,13 +90,18 @@ namespace Griffeye.VlcWrapper.MediaPlayer
                     aspectRatio *= (float) videoTrack.Data.Video.SarNum / videoTrack.Data.Video.SarDen;
                 }
 
-                MediaInfoChanged?.Invoke(this, new MediaInfo
+                VideoInfoChanged?.Invoke(this, new VideoInfo
                 {
                     VideoOrientation = orientation.ToString(), AspectRatio = aspectRatio
                 });
             };
             
             mediaPlayer.LengthChanged += (sender, args) => LengthChanged?.Invoke(this, args);
+            mediaPlayer.Playing += (sender, args) => Playing?.Invoke(this, args);
+            mediaPlayer.Paused += (sender, args) => Paused?.Invoke(this, args);
+            mediaPlayer.VolumeChanged += (sender, args) => VolumeChanged?.Invoke(this, args);
+            mediaPlayer.Unmuted += (sender, args) => Unmuted?.Invoke(this, args);
+            mediaPlayer.Muted += (sender, args) => Muted?.Invoke(this, args);
         }
 
         private static bool IsFlipped(VideoOrientation orientation)
@@ -192,7 +202,7 @@ namespace Griffeye.VlcWrapper.MediaPlayer
                 mre.Wait();
                 mediaPlayer.SnapshotTaken -= MediaPlayerOnSnapshotTaken;
                 
-                void MediaPlayerOnSnapshotTaken(object? sender, MediaPlayerSnapshotTakenEventArgs e)
+                void MediaPlayerOnSnapshotTaken(object sender, MediaPlayerSnapshotTakenEventArgs e)
                 {
                     mre.Set();
                 }
@@ -228,15 +238,21 @@ namespace Griffeye.VlcWrapper.MediaPlayer
         public void StepForward()
         {
             mediaPlayer.NextFrame();
+
+            var time = (long)(mediaPlayer.Time + 1000 / mediaPlayer.Fps);
+            TimeChanged?.Invoke(this, time);
         }
 
         public void StepBack()
         {
             mediaPlayer.SetPause(true);
-            var time = Math.Max(
-                Math.Min(mediaPlayer.Time - (long)Math.Ceiling(1000d / mediaPlayer.Fps), mediaPlayer.Length), 0);
+            
+            var oneFrame = 1 / (mediaPlayer.Fps * (mediaPlayer.Length / 1000f));
 
-            mediaPlayer.Time = time;
+            mediaPlayer.Position -= oneFrame;
+            var time = (long)(mediaPlayer.Time - 1000 / mediaPlayer.Fps);
+
+            TimeChanged?.Invoke(this, time);                     
         }
 
         public void Dispose()

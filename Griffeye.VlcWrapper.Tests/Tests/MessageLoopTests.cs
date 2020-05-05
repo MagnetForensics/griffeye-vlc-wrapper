@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.IO.Pipes;
+using System.Threading.Tasks;
 using AutoFixture.NUnit3;
 using FluentAssertions;
 using Griffeye.VideoPlayerContract.Messages.Requests;
@@ -20,18 +21,25 @@ namespace Griffeye.VlcWrapper.Tests.Tests
         public class StartShould
         {
             [Theory, MessageLoopData]
-            public void CreatesAnonymousPipes([Frozen]IStreamFactory streamFactory, InputData input, MessageLoop sut)
+            public async Task SubscribeToMediaPlayerEventsUsingIEventService([Frozen]IEventService eventService, MessageLoop sut)
             {
-                sut.Start();
+                await sut.Start();
+                eventService.Received(1).Subscribe(Arg.Any<Stream>());
+            }
+
+            [Theory, MessageLoopData]
+            public async Task CreatesAnonymousPipes([Frozen]IStreamFactory streamFactory, InputData input, MessageLoop sut)
+            {
+                await sut.Start();
                 streamFactory.Received(1).CreateAnonymousPipeClientStream(PipeDirection.In, input.PipeInName);
                 streamFactory.Received(1).CreateAnonymousPipeClientStream(PipeDirection.Out, input.PipeOutName);
                 streamFactory.Received(1).CreateAnonymousPipeClientStream(PipeDirection.Out, input.PipeEventName);
             }
             
             [Theory, MessageLoopData]
-            public void UseIMessageSerializer([Frozen]IMessageSerializer messageSerializer,  MessageLoop sut)
+            public async Task UseIMessageSerializer([Frozen]IMessageSerializer messageSerializer,  MessageLoop sut)
             {
-                sut.Start();
+                await sut.Start();
                 messageSerializer
                     .Received(1)
                     .DeserializeWithLengthPrefix<BaseRequest>(Arg.Any<Stream>(), PrefixStyle.Base128);
@@ -47,10 +55,10 @@ namespace Griffeye.VlcWrapper.Tests.Tests
             }
 
             [Theory, MessageLoopData]
-            public void ProcessMessages([Frozen]IMessageService messageService, [Frozen]BaseRequest message,
+            public async Task ProcessMessages([Frozen]IMessageService messageService, [Frozen]BaseRequest message,
                 MessageLoop sut)
             {
-                sut.Start();
+                await sut.Start();
                 messageService.Received(1).Process(message, Arg.Any<Stream>(), Arg.Any<Stream>());
             }
         }

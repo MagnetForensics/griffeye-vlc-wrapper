@@ -1,5 +1,4 @@
 ﻿using Griffeye.VideoPlayerContract.Messages.Requests;
-using Griffeye.VlcWrapper.MediaPlayer;
 using Griffeye.VlcWrapper.Messaging.Interfaces;
 using Griffeye.VlcWrapper.Models;
 using Microsoft.Extensions.Logging;
@@ -7,6 +6,7 @@ using ProtoBuf;
 using System;
 using System.IO;
 using System.IO.Pipes;
+using System.Threading.Tasks;
 
 namespace Griffeye.VlcWrapper.Messaging
 {
@@ -17,9 +17,10 @@ namespace Griffeye.VlcWrapper.Messaging
         private readonly IStreamFactory streamFactory;
         private readonly IMessageSerializer messageSerializer;
         private readonly InputData inputData;
+        private readonly IEventService eventService;
 
         public MessageLoop(IMessageService messageService, ILogger<MessageLoop> logger,
-            IStreamFactory streamFactory, IMessageSerializer messageSerializer, InputData inputData)
+            IStreamFactory streamFactory, IMessageSerializer messageSerializer, InputData inputData, IEventService eventService)
         {
          
             this.messageService = messageService;
@@ -27,30 +28,37 @@ namespace Griffeye.VlcWrapper.Messaging
             this.streamFactory = streamFactory;
             this.messageSerializer = messageSerializer;
             this.inputData = inputData;
+            this.eventService = eventService;
         }
 
-        public void Start()
+        public async Task Start()
         {
             using var pipeInStream = streamFactory.CreateAnonymousPipeClientStream(PipeDirection.In, inputData.PipeInName);
             using var pipeOutStream = streamFactory.CreateAnonymousPipeClientStream(PipeDirection.Out, inputData.PipeOutName);
             using var pipeEventStream = streamFactory.CreateAnonymousPipeClientStream(PipeDirection.Out, inputData.PipeEventName);
-            
+
+            eventService.Subscribe(pipeEventStream);
+
             try
             {
                 var done = false;
 
                 while (!done)
                 {
+                    await pipeInStream.ReadAsync(new byte[0], 0, 0);
                     var message = messageSerializer
                         .DeserializeWithLengthPrefix<BaseRequest>(pipeInStream, PrefixStyle.Base128);
 
                     if (message == null)
                     {
+                        logger.LogError("Got unknown command from video player sub process.");
                         throw new InvalidOperationException("Unknown command from video player sub process.");
                     }
 
+                    logger.LogInformation($"Got message with type: {message.GetType()} and sequence number: {message.SequenceNumber}");
                     done = messageService.Process(message, pipeEventStream, pipeOutStream);
                 }
+                logger.LogInformation($"Handled message of type: Quit.");
             }
             catch (EndOfStreamException) { logger.LogInformation("End of stream"); }
         }

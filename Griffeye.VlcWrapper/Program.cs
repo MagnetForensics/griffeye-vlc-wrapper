@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using Griffeye.VlcWrapper.Factories;
 using Griffeye.VlcWrapper.MediaPlayer;
 using Griffeye.VlcWrapper.Messaging;
@@ -15,7 +16,7 @@ namespace Griffeye.VlcWrapper
 {
     class Program
     {
-        private static int Main(string[] args)
+        private static async Task<int> Main(string[] args)
         {
             
             var config = SetupConfiguration(args);
@@ -34,7 +35,7 @@ namespace Griffeye.VlcWrapper
             try
             {
                 var messageLoop = serviceProvider.GetService<IMessageLoop>();
-                messageLoop.Start();
+                await messageLoop.Start();
 
                 return 0;
             }

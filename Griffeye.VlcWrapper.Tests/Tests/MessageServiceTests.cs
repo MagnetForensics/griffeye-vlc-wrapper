@@ -15,14 +15,7 @@ namespace Griffeye.VlcWrapper.Tests.Tests
     public class MessageServiceTests
     {
         public class ProcessShould
-        {
-            [Theory, AutoNSubstituteData]
-            public void SubscribeToMediaPlayerEventsUsingIEventService([Frozen]IEventService eventService, [Frozen]Stream eventStream, BaseRequest message, Stream outStream, MessageService sut)
-            {
-                sut.Process(message, eventStream, outStream);
-                eventService.Received(1).Subscribe(Arg.Any<IMediaPlayer>(), eventStream);
-            }
-            
+        {            
             [Theory, AutoNSubstituteData]
             public void CheckIfQuitMessageUsingIRequestService([Frozen]IRequestService requestService, [Frozen]Stream eventStream, [Frozen]BaseRequest message, Stream outStream, MessageService sut)
             {

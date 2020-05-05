@@ -2,6 +2,7 @@
 
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
+        <LangVersion>latest</LangVersion>
         <RootNamespace>Griffeye.VideoPlayerContract</RootNamespace>
         <Platforms>AnyCPU</Platforms>
         <RepositoryUrl>https://github.com/griffeye/videoplayer</RepositoryUrl>
@@ -12,9 +13,8 @@
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
         <PackageLicenseExpression></PackageLicenseExpression>
         <AssemblyVersion>2.0.0.0</AssemblyVersion>
-        <FileVersion>2.0.0.0</FileVersion>
-        <Version>1.0.1</Version>
-        <PackageVersion>2.0.0</PackageVersion>
+        <FileVersion>2.0.3.0</FileVersion>
+        <PackageVersion>2.0.3</PackageVersion>
     </PropertyGroup>
 
     <ItemGroup>

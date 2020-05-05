@@ -8,7 +8,7 @@ namespace Griffeye.VlcWrapper.Tests.AutoData
         {
             fixture
                 .Customize(new InputDataCustomization())
-                .Customize(new StreamFactoryReturnsNullCustomization())
+                .Customize(new StreamFactoryReturnsMemoryStreamCustomization())
                 .Customize(new SerializerMessageCustomization {ReturnsNull = messageIsNull})
                 .Customize(new MessageServiceCustomization {Returns = messageServiceReturns});
         })
