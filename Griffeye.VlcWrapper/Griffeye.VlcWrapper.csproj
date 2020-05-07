@@ -14,11 +14,11 @@
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/griffeye/videoplayer</PackageProjectUrl>
     <RepositoryUrl>https://github.com/griffeye/videoplayer</RepositoryUrl>
-    <AssemblyVersion>2.0.0.0</AssemblyVersion>
-    <FileVersion>2.0.9.0</FileVersion>
+    <AssemblyVersion>3.0.0.0</AssemblyVersion>
+    <FileVersion>3.0.4.0</FileVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="LibVLCSharp" Version="3.4.3" />
+    <PackageReference Include="LibVLCSharp" Version="3.4.5" />
     <PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="3.1.3" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.3" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.3" />
@@ -32,33 +32,33 @@
     <PackageReference Include="Serilog.Settings.Configuration" Version="3.1.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="4.1.0" />
     <PackageReference Include="SSG.LocalFileStreamClient" Version="2.0.0" />
-    <PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.8.1" />
+    <PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.10" />
     <PackageReference Include="Serilog.Enrichers.Thread" Version="3.1.0" />
     <PackageReference Include="Serilog.Sinks.Async" Version="1.4.0" />
   </ItemGroup>
   <ItemGroup>
-    <VlcWindowsX64ExcludeFiles Include="plugins\lua\%2A;plugins\gui\%2A;plugins\access_output\%2A;plugins\control\%2A;plugins\stream_out\%2A"/>
-    <VlcWindowsX64ExcludeFiles Include="plugins\access\libdshow_plugin.dll"/>
-    <VlcWindowsX64ExcludeFiles Include="plugins\audio_filter\libdolby_surround_decoder_plugin.dll"/>
-    <VlcWindowsX64ExcludeFiles Include="plugins\audio_filter\libheadphone_channel_mixer_plugin.dll"/>
-    <VlcWindowsX64ExcludeFiles Include="plugins\audio_filter\libmono_plugin.dll"/>
-    <VlcWindowsX64ExcludeFiles Include="plugins\codec\libx264_plugin.dll"/>
-    <VlcWindowsX64ExcludeFiles Include="plugins\codec\libx26410b_plugin.dll"/>
-    <VlcWindowsX64ExcludeFiles Include="plugins\codec\libx265_plugin.dll"/>
-    <VlcWindowsX64ExcludeFiles Include="plugins\codec\libt140_plugin.dll"/>
-    <VlcWindowsX64ExcludeFiles Include="plugins\demux\libmpc_plugin.dll"/>
-    <VlcWindowsX64ExcludeFiles Include="plugins\demux\libreal_plugin.dll"/>
-    <VlcWindowsX64ExcludeFiles Include="plugins\access\libaccess_realrtsp_plugin.dll"/>
-    <VlcWindowsX64ExcludeFiles Include="plugins\misc\libaudioscrobbler_plugin.dll"/>
-    <VlcWindowsX64ExcludeFiles Include="plugins\video_filter\librotate_plugin.dll"/>
-    <VlcWindowsX64ExcludeFiles Include="plugins\services_discovery\libsap_plugin.dll"/>
-    <VlcWindowsX64ExcludeFiles Include="plugins\text_renderer\libsapi_plugin.dll"/>
-    <VlcWindowsX64ExcludeFiles Include="plugins\services_discovery\libmediadirs_plugin.dll"/>
-    <VlcWindowsX64ExcludeFiles Include="plugins\services_discovery\libpodcast_plugin.dll"/>
-    <VlcWindowsX86ExcludeFiles Include="@(VlcWindowsX64ExcludeFiles)"/>
+    <VlcWindowsX64ExcludeFiles Include="plugins\lua\%2A;plugins\gui\%2A;plugins\access_output\%2A;plugins\control\%2A;plugins\stream_out\%2A" />
+    <VlcWindowsX64ExcludeFiles Include="plugins\access\libdshow_plugin.dll" />
+    <VlcWindowsX64ExcludeFiles Include="plugins\audio_filter\libdolby_surround_decoder_plugin.dll" />
+    <VlcWindowsX64ExcludeFiles Include="plugins\audio_filter\libheadphone_channel_mixer_plugin.dll" />
+    <VlcWindowsX64ExcludeFiles Include="plugins\audio_filter\libmono_plugin.dll" />
+    <VlcWindowsX64ExcludeFiles Include="plugins\codec\libx264_plugin.dll" />
+    <VlcWindowsX64ExcludeFiles Include="plugins\codec\libx26410b_plugin.dll" />
+    <VlcWindowsX64ExcludeFiles Include="plugins\codec\libx265_plugin.dll" />
+    <VlcWindowsX64ExcludeFiles Include="plugins\codec\libt140_plugin.dll" />
+    <VlcWindowsX64ExcludeFiles Include="plugins\demux\libmpc_plugin.dll" />
+    <VlcWindowsX64ExcludeFiles Include="plugins\demux\libreal_plugin.dll" />
+    <VlcWindowsX64ExcludeFiles Include="plugins\access\libaccess_realrtsp_plugin.dll" />
+    <VlcWindowsX64ExcludeFiles Include="plugins\misc\libaudioscrobbler_plugin.dll" />
+    <VlcWindowsX64ExcludeFiles Include="plugins\video_filter\librotate_plugin.dll" />
+    <VlcWindowsX64ExcludeFiles Include="plugins\services_discovery\libsap_plugin.dll" />
+    <VlcWindowsX64ExcludeFiles Include="plugins\text_renderer\libsapi_plugin.dll" />
+    <VlcWindowsX64ExcludeFiles Include="plugins\services_discovery\libmediadirs_plugin.dll" />
+    <VlcWindowsX64ExcludeFiles Include="plugins\services_discovery\libpodcast_plugin.dll" />
+    <VlcWindowsX86ExcludeFiles Include="@(VlcWindowsX64ExcludeFiles)" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Griffeye.VideoPlayerContract\Griffeye.VideoPlayerContract.csproj"/>
+    <ProjectReference Include="..\Griffeye.VideoPlayerContract\Griffeye.VideoPlayerContract.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Update="appsettings.json">

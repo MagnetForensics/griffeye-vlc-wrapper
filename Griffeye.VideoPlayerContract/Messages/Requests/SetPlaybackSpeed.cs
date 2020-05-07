@@ -7,7 +7,10 @@ namespace Griffeye.VideoPlayerContract.Messages.Requests
     {
         public float Speed { get; private set; }
 
-        public SetPlaybackSpeed(float speed) : this() { Speed = speed; }
+        public SetPlaybackSpeed(float speed)
+        { 
+            Speed = speed;
+        }
 
         private SetPlaybackSpeed() { }
     }

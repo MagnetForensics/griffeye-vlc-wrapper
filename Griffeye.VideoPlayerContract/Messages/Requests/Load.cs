@@ -7,12 +7,16 @@ namespace Griffeye.VideoPlayerContract.Messages.Requests
     public class Load : BaseRequest
     {
         public string FileToLoad { get; private set; }
+        public float StartPosition { get; private set; }
+        public float StopPosition { get; private set; }
         public StreamType Type { get; private set; }
 
-        public Load(StreamType type, string fileToLoad) : this()
+        public Load(StreamType type, string fileToLoad, float startPosition, float stopPosition)
         {
             Type = type;
             FileToLoad = fileToLoad;
+            StartPosition = startPosition;
+            StopPosition = stopPosition;
         }
 
         private Load() { }

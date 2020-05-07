@@ -21,7 +21,7 @@ namespace Griffeye.VlcWrapper.MediaPlayer
         public void ConnectLocalFileStream(string pipeName);
         void Play();
         void Pause();
-        void LoadMedia(StreamType type, string fileToLoad);
+        void LoadMedia(StreamType type, string file, float startPosition, float stopPosition);
         void Seek(float position);
         void SetPlaybackSpeed(float speed);
         void SetVolume(int volume);

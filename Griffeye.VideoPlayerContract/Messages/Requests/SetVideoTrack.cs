@@ -6,7 +6,7 @@ namespace Griffeye.VideoPlayerContract.Messages.Requests
     public class SetVideoTrack : BaseRequest
     {
         public int TrackId { get; private set; }
-        public SetVideoTrack(int trackId) : this()
+        public SetVideoTrack(int trackId)
         {
             TrackId = trackId;
         }

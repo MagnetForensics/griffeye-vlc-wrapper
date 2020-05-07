@@ -6,11 +6,11 @@ namespace Griffeye.VideoPlayerContract.Messages.Requests
     public class SetAudioTrack : BaseRequest
     {
         public int TrackId { get; private set; }
-        public SetAudioTrack(int trackId) : this()
+        public SetAudioTrack(int trackId)
         {
             TrackId = trackId;
         }
 
-        public SetAudioTrack() { }
+        private SetAudioTrack() { }
     }
 }

@@ -3,10 +3,9 @@
 namespace Griffeye.VideoPlayerContract.Messages.Events
 {
     [ProtoContract(ImplicitFields = ImplicitFields.AllPublic)]
-    [ProtoInclude(100, typeof(PositionUpdateEvent))]
+    [ProtoInclude(100, typeof(TimeUpdatedEvent))]
     [ProtoInclude(200, typeof(DurationEvent))]
     [ProtoInclude(300, typeof(MediaInfoEvent))]
-    [ProtoInclude(400, typeof(LogEvent))]
     [ProtoInclude(500, typeof(EndOfFileEvent))]
     [ProtoInclude(600, typeof(PlayingEvent))]
     [ProtoInclude(700, typeof(PausedEvent))]

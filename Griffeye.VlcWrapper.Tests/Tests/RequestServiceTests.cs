@@ -124,7 +124,7 @@ namespace Griffeye.VlcWrapper.Tests.Tests
                 Stream outStream, Load message, RequestService sut)
             {
                 sut.CanHandleMessage(mediaPlayer, message, outStream);
-                mediaPlayer.Received(1).LoadMedia(message.Type, message.FileToLoad);
+                mediaPlayer.Received(1).LoadMedia(message.Type, message.FileToLoad, message.StartPosition, message.StopPosition);
             }
             
             [Theory, AutoNSubstituteData]

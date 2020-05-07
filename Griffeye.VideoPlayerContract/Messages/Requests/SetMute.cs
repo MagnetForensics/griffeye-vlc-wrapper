@@ -7,7 +7,10 @@ namespace Griffeye.VideoPlayerContract.Messages.Requests
     {
         public bool IsMuted { get; private set; }
 
-        public SetMute(bool isMuted) : this() { IsMuted = isMuted; }
+        public SetMute(bool isMuted) 
+        { 
+            IsMuted = isMuted; 
+        }
 
         private SetMute() {}
     }

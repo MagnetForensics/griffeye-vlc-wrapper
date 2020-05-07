@@ -33,7 +33,7 @@ namespace Griffeye.VlcWrapper.Messaging
             {
                 logger.LogDebug("Time changed event triggered.");
                 messageSerializer
-                    .SerializeWithLengthPrefix(eventStream, new PositionUpdateEvent(a / 1000f), PrefixStyle.Base128);
+                    .SerializeWithLengthPrefix(eventStream, new TimeUpdatedEvent(a / 1000f), PrefixStyle.Base128);
             };
 
             mediaPlayer.LengthChanged += (s, a) =>

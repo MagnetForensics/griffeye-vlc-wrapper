@@ -38,7 +38,7 @@ namespace Griffeye.VlcWrapper.Messaging
 
             switch (message)
             {
-                case Load m: mediaPlayer.LoadMedia(m.Type, m.FileToLoad); break;
+                case Load m: mediaPlayer.LoadMedia(m.Type, m.FileToLoad, m.StartPosition, m.StopPosition); break;
                 case LocalFileStreamConnect m: mediaPlayer.ConnectLocalFileStream(m.PipeName); break;
                 case CreateSnapshot m: 
                     success = mediaPlayer.CreateSnapshot(m.NumberOfVideoOutput, m.Width, m.Height, m.FilePath); break;

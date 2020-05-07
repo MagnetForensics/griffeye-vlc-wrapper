@@ -7,7 +7,10 @@ namespace Griffeye.VideoPlayerContract.Messages.Requests
     {
         public float Position { get; private set; }
 
-        public Seek(float position) : this() { Position = position; }
+        public Seek(float position) 
+        { 
+            Position = position; 
+        }
 
         private Seek() {}
     }

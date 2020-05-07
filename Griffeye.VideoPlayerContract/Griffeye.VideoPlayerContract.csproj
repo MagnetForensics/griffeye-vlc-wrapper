@@ -12,9 +12,9 @@
         <Authors>Robin Gustavsson, Adam Sällergård</Authors>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
         <PackageLicenseExpression></PackageLicenseExpression>
-        <AssemblyVersion>2.0.0.0</AssemblyVersion>
-        <FileVersion>2.0.3.0</FileVersion>
-        <PackageVersion>2.0.3</PackageVersion>
+        <AssemblyVersion>3.0.0.0</AssemblyVersion>
+        <FileVersion>3.0.0.0</FileVersion>
+        <PackageVersion>3.0.0</PackageVersion>
     </PropertyGroup>
 
     <ItemGroup>

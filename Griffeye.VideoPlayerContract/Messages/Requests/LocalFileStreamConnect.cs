@@ -6,7 +6,10 @@ namespace Griffeye.VideoPlayerContract.Messages.Requests
     public class LocalFileStreamConnect : BaseRequest
     {
         public string PipeName { get; private set; }
-        public LocalFileStreamConnect(string pipeName) : this() { PipeName = pipeName; }
+        public LocalFileStreamConnect(string pipeName)
+        {
+            PipeName = pipeName;
+        }
         private LocalFileStreamConnect() {}
     }
 }

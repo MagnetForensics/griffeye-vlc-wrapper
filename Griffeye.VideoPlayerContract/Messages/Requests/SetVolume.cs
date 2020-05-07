@@ -7,7 +7,10 @@ namespace Griffeye.VideoPlayerContract.Messages.Requests
     {
         public int Volume { get; private set; }
 
-        public SetVolume(int volume) : this() { Volume = volume; }
+        public SetVolume(int volume)
+        { 
+            Volume = volume;
+        }
 
         private SetVolume() {}
     }

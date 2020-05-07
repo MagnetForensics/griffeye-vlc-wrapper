@@ -17,8 +17,7 @@ namespace Griffeye.VlcWrapper
     class Program
     {
         private static async Task<int> Main(string[] args)
-        {
-            
+        {            
             var config = SetupConfiguration(args);
             var serviceProvider = RegisterServices(config);
             var input = serviceProvider.GetService<InputData>();
