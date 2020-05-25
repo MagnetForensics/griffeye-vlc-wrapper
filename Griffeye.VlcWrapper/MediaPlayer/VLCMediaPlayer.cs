@@ -105,7 +105,7 @@ namespace Griffeye.VlcWrapper.MediaPlayer
                 });
             };
 
-            mediaPlayer.LengthChanged += (sender, args) => LengthChanged?.Invoke(this, args);
+            mediaPlayer.LengthChanged += (sender, args) => { if (args.Length > 0) { LengthChanged?.Invoke(this, args); } };
             mediaPlayer.Playing += (sender, args) => Playing?.Invoke(this, args);
             mediaPlayer.Paused += (sender, args) => Paused?.Invoke(this, args);
             mediaPlayer.VolumeChanged += (sender, args) => VolumeChanged?.Invoke(this, args);
@@ -147,14 +147,13 @@ namespace Griffeye.VlcWrapper.MediaPlayer
         public void Pause() { mediaPlayer.SetPause(true); }
 
         public void Seek(float position)
-        {          
+        {
             var allowedPosition = Math.Max(Math.Min(position, stopPosition), startPosition);
 
             if (mediaPlayer.State == VLCState.Ended)
-            {              
+            {
                 mediaPlayer.Stop();
-                mediaPlayer.Play();
-                mediaPlayer.SetPause(true);
+                PlayUntillBuffered();
             }
 
             mediaPlayer.Position = allowedPosition;
@@ -163,8 +162,8 @@ namespace Griffeye.VlcWrapper.MediaPlayer
         public void LoadMedia(StreamType type, string file, float startPosition, float stopPosition)
         {
             this.startPosition = startPosition;
-            this.stopPosition = stopPosition;      
-         
+            this.stopPosition = stopPosition;
+
             aspectRationSet = false;
 
             if (type == StreamType.LocalFileStream)
@@ -182,9 +181,23 @@ namespace Griffeye.VlcWrapper.MediaPlayer
                 using var media = new Media(library, file);
                 mediaPlayer.Media = media;
             }
-            mediaPlayer.Play();           
-            mediaPlayer.SetPause(true);
+            PlayUntillBuffered();
             mediaPlayer.Position = startPosition;
+        }
+
+        private void PlayUntillBuffered()
+        {
+            using var mre = new ManualResetEvent(false);
+            mediaPlayer.Buffering += mediaPlayerOnBuffering;
+            mediaPlayer.Play();
+            mre.WaitOne(TimeSpan.FromSeconds(5));
+            mediaPlayer.Buffering -= mediaPlayerOnBuffering;
+            mediaPlayer.SetPause(true);
+
+            void mediaPlayerOnBuffering(object sender, MediaPlayerBufferingEventArgs args)
+            {
+                if (args.Cache >= 100) { mre.Set(); }
+            }
         }
 
         public void SetPlaybackSpeed(float speed) { mediaPlayer.SetRate(speed); }
@@ -198,21 +211,15 @@ namespace Griffeye.VlcWrapper.MediaPlayer
 
         public bool CreateSnapshot(int numberOfVideoOutput, int width, int height, string filePath)
         {
-            var currentVideoTrack = mediaPlayer.VideoTrack;
+            using var mre = new ManualResetEventSlim();
+            mediaPlayer.SnapshotTaken += MediaPlayerOnSnapshotTaken;
+            mediaPlayer.TakeSnapshot((uint)numberOfVideoOutput, filePath, (uint)width, (uint)height);
+            mre.Wait();
+            mediaPlayer.SnapshotTaken -= MediaPlayerOnSnapshotTaken;
 
-            if (currentVideoTrack == -1) { return false; }
-
-            using (var mre = new ManualResetEventSlim())
+            void MediaPlayerOnSnapshotTaken(object sender, MediaPlayerSnapshotTakenEventArgs e)
             {
-                mediaPlayer.SnapshotTaken += MediaPlayerOnSnapshotTaken;
-                mediaPlayer.TakeSnapshot((uint)numberOfVideoOutput, filePath, (uint)width, (uint)height);
-                mre.Wait();
-                mediaPlayer.SnapshotTaken -= MediaPlayerOnSnapshotTaken;
-
-                void MediaPlayerOnSnapshotTaken(object sender, MediaPlayerSnapshotTakenEventArgs e)
-                {
-                    mre.Set();
-                }
+                mre.Set();
             }
 
             return true;
@@ -254,10 +261,8 @@ namespace Griffeye.VlcWrapper.MediaPlayer
         {
             mediaPlayer.SetPause(true);
 
-            var oneFrame = 1 / (mediaPlayer.Fps * (mediaPlayer.Length / 1000f));
-
-            Seek(mediaPlayer.Position - oneFrame);
             time -= (long)(1000 / mediaPlayer.Fps);
+            Seek((float)time / mediaPlayer.Length);
 
             TimeChanged?.Invoke(this, time);
         }
