@@ -155,8 +155,9 @@ namespace Griffeye.VlcWrapper.MediaPlayer
                 mediaPlayer.Stop();
                 PlayUntillBuffered();
             }
-
             mediaPlayer.Position = allowedPosition;
+            time = mediaPlayer.Time;
+            TimeChanged?.Invoke(this, time);
         }
 
         public void LoadMedia(StreamType type, string file, float startPosition, float stopPosition)
@@ -263,8 +264,6 @@ namespace Griffeye.VlcWrapper.MediaPlayer
 
             time -= (long)(1000 / mediaPlayer.Fps);
             Seek((float)time / mediaPlayer.Length);
-
-            TimeChanged?.Invoke(this, time);
         }
 
         public void Dispose()
