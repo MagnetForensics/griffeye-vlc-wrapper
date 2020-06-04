@@ -39,8 +39,12 @@ namespace Griffeye.VlcWrapper
                 return 0;
             }
             catch (Exception ex) { logger.LogError(ex, ex.Message); }
-            finally { DisposeServices(serviceProvider); }
-            
+            finally 
+            {
+                logger.LogInformation("Video player exited.");
+                Log.CloseAndFlush();
+                DisposeServices(serviceProvider);
+            }
             return -1;
         }
 

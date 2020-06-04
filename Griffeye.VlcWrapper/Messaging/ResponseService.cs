@@ -23,7 +23,7 @@ namespace Griffeye.VlcWrapper.Messaging
         {
             var response = new BaseResponse(message.SequenceNumber);
 
-            logger.LogInformation($"Returning empty response with sequence number: {message.SequenceNumber}");
+            logger.LogDebug("Returning empty response with {Sequence}", message.SequenceNumber);
             messageSerializer.SerializeWithLengthPrefix(outStream, response, PrefixStyle.Base128);
         }
 
@@ -31,8 +31,8 @@ namespace Griffeye.VlcWrapper.Messaging
         {
             var response = new ResultResponse(message.SequenceNumber, success);
 
-            logger.LogInformation(
-                $"Returning result response with sequence number: {message.SequenceNumber} and success code: {success}");
+            logger.LogDebug(
+                "Returning result response with {Sequence} and {Result}", message.SequenceNumber, success);
             messageSerializer.SerializeWithLengthPrefix(outStream, response, PrefixStyle.Base128);
         }
 
@@ -40,8 +40,7 @@ namespace Griffeye.VlcWrapper.Messaging
         {
             var response = new TracksResponse(tracks, message.SequenceNumber);
 
-            logger.LogInformation(
-                $"Returning result response with sequence number: {message.SequenceNumber} and result: {tracks}");
+            logger.LogDebug("Returning result response with {Sequence} and {Result}", message.SequenceNumber, tracks);
             messageSerializer.SerializeWithLengthPrefix(outStream, response, PrefixStyle.Base128);
         }
     }

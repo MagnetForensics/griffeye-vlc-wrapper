@@ -27,8 +27,8 @@ namespace Griffeye.VlcWrapper.Messaging
             var result = ExecuteResultResponse(mediaPlayer, message, outStream) ||
                    ExecuteEmptyResponse(mediaPlayer, message, outStream);
 
-            logger.LogInformation($"Handled message of type: {message.GetType()} with sequence number: {message.SequenceNumber}");
-            
+            logger.LogDebug("Handled message of {Type} with {Sequence}", message.GetType(), message.SequenceNumber);
+
             return result;
         }
 
@@ -40,14 +40,9 @@ namespace Griffeye.VlcWrapper.Messaging
             {
                 case Load m: mediaPlayer.LoadMedia(m.Type, m.FileToLoad, m.StartPosition, m.StopPosition); break;
                 case LocalFileStreamConnect m: mediaPlayer.ConnectLocalFileStream(m.PipeName); break;
-                case CreateSnapshot m: 
-                    success = mediaPlayer.CreateSnapshot(m.NumberOfVideoOutput, m.Width, m.Height, m.FilePath); break;
-                case GetAudioTracks _: 
-                    responseService.ReturnResultResponse(outStream, message, mediaPlayer.GetAudioTracks());
-                    return true;
-                case GetVideoTracks _:
-                    responseService.ReturnResultResponse(outStream, message, mediaPlayer.GetVideoTracks()); 
-                    return true;
+                case CreateSnapshot m: success = mediaPlayer.CreateSnapshot(m.NumberOfVideoOutput, m.Width, m.Height, m.FilePath); break;
+                case GetAudioTracks _: responseService.ReturnResultResponse(outStream, message, mediaPlayer.GetAudioTracks()); return true;
+                case GetVideoTracks _: responseService.ReturnResultResponse(outStream, message, mediaPlayer.GetVideoTracks()); return true;
                 default: return false;
             }
 

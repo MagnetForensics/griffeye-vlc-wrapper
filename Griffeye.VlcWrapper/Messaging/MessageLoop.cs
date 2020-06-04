@@ -46,19 +46,17 @@ namespace Griffeye.VlcWrapper.Messaging
                 while (!done)
                 {
                     await pipeInStream.ReadAsync(new byte[0], 0, 0);
-                    var message = messageSerializer
-                        .DeserializeWithLengthPrefix<BaseRequest>(pipeInStream, PrefixStyle.Base128);
+                    var message = messageSerializer.DeserializeWithLengthPrefix<BaseRequest>(pipeInStream, PrefixStyle.Base128);
 
                     if (message == null)
                     {
-                        logger.LogError("Got unknown command from video player sub process.");
-                        throw new InvalidOperationException("Unknown command from video player sub process.");
+                        throw new InvalidOperationException($"No data in pipe.");
                     }
 
-                    logger.LogInformation($"Got message with type: {message.GetType()} and sequence number: {message.SequenceNumber}");
+                    logger.LogDebug("Got message with {Type} and {Sequence}", message.GetType(), message.SequenceNumber);
                     done = messageService.Process(message, pipeEventStream, pipeOutStream);
                 }
-                logger.LogInformation($"Handled message of type: Quit.");
+                logger.LogInformation($"Handled message of Type Quit");
             }
             catch (EndOfStreamException) { logger.LogInformation("End of stream"); }
         }

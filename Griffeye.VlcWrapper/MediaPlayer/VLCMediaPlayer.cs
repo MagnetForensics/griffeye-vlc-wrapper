@@ -24,6 +24,7 @@ namespace Griffeye.VlcWrapper.MediaPlayer
         private bool aspectRationSet;
         private float startPosition;
         private float stopPosition;
+        private long time;
 
         public event EventHandler<EventArgs> EndReached;
         public event EventHandler<long> TimeChanged;
@@ -35,39 +36,50 @@ namespace Griffeye.VlcWrapper.MediaPlayer
         public event EventHandler<EventArgs> Unmuted;
         public event EventHandler<EventArgs> Muted;
 
+        private readonly List<string> vlcArguments = new List<string>
+        {
+            "--no-video-title-show",
+            "--no-stats",
+            "--no-sub-autodetect-file",
+            "--no-snapshot-preview",
+            "--intf",
+            "dummy",
+            "--no-spu",
+            "--no-osd",
+            "--no-lua",
+            "--quiet-synchro"
+        };
+
         public VLCMediaPlayer(InputData inputData, ILogger<VLCMediaPlayer> logger)
         {
             this.logger = logger;
             Core.Initialize();
             localFileStreamClient = new Client();
-            library = new LibVLC(
-                "--no-video-title-show",
-                "--no-stats",
-                "--no-sub-autodetect-file",
-                "--no-snapshot-preview",
-                "--intf",
-                "dummy",
-                "--no-spu",
-                "--no-osd",
-                "--no-lua",
-                "--quiet-synchro",
-                "-v");
+            if (inputData.AttachDebugger)
+            {
+                vlcArguments.Add("--verbose=2");
+            }
+            else
+            {
+                vlcArguments.Add("--verbose=0");
+            }
+
+            library = new LibVLC(vlcArguments.ToArray());
             library.Log += Library_Log;
             mediaPlayer = new LibVLCSharp.Shared.MediaPlayer(library)
             {
                 Hwnd = new IntPtr(inputData.Handle),
                 EnableKeyInput = false,
-                EnableMouseInput = false
+                EnableMouseInput = false,
+                EnableHardwareDecoding = true,
             };
             mediaPlayer.PositionChanged += MediaPlayer_PositionChanged;
             mediaPlayer.EndReached += (sender, args) =>
-            {
-                logger.LogDebug("End reached");
+            {                
                 EndReached?.Invoke(this, args);
             };
             mediaPlayer.TimeChanged += (sender, args) =>
-            {
-                logger.LogDebug($"time = {args.Time}");
+            {                
                 time = args.Time;
                 TimeChanged?.Invoke(this, args.Time);
 
@@ -114,13 +126,8 @@ namespace Griffeye.VlcWrapper.MediaPlayer
         }
 
         private void MediaPlayer_PositionChanged(object sender, MediaPlayerPositionChangedEventArgs e)
-        {
-            logger.LogDebug($"Position = {e.Position}");
-            if (e.Position >= stopPosition)
-            {
-                logger.LogDebug($"pausing, e.Position = {e.Position}, stopPosition = {stopPosition}");
-                Task.Run(() => { mediaPlayer.SetPause(true); });
-            }
+        {            
+            if (e.Position >= stopPosition) { Task.Run(() => { mediaPlayer.SetPause(true); });}
         }
 
         private static bool IsFlipped(VideoOrientation orientation)
@@ -132,13 +139,10 @@ namespace Griffeye.VlcWrapper.MediaPlayer
 
         private void Library_Log(object sender, LogEventArgs e)
         {
-            logger.LogDebug($"{e.Module} {e.Level} {e.Message}");
+            logger.LogDebug("{Module} {Level} {Message}", e.Module, e.Level, e.Message);
         }
 
-        public void ConnectLocalFileStream(string pipeName)
-        {
-            localFileStreamClient.Connect(pipeName);
-        }
+        public void ConnectLocalFileStream(string pipeName) { localFileStreamClient.Connect(pipeName); }
 
         public void DisconnectLocalFileStream() { localFileStreamClient.Disconnect(); }
 
@@ -155,6 +159,7 @@ namespace Griffeye.VlcWrapper.MediaPlayer
                 mediaPlayer.Stop();
                 PlayUntillBuffered();
             }
+
             mediaPlayer.Position = allowedPosition;
             time = mediaPlayer.Time;
             TimeChanged?.Invoke(this, time);
@@ -175,6 +180,7 @@ namespace Griffeye.VlcWrapper.MediaPlayer
                 streamMediaInput = new StreamMediaInput(currStream);
 
                 using var media = new Media(library, streamMediaInput);
+
                 mediaPlayer.Media = media;
             }
             else
@@ -182,6 +188,7 @@ namespace Griffeye.VlcWrapper.MediaPlayer
                 using var media = new Media(library, file);
                 mediaPlayer.Media = media;
             }
+
             PlayUntillBuffered();
             mediaPlayer.Position = startPosition;
         }
@@ -189,6 +196,7 @@ namespace Griffeye.VlcWrapper.MediaPlayer
         private void PlayUntillBuffered()
         {
             using var mre = new ManualResetEvent(false);
+
             mediaPlayer.Buffering += mediaPlayerOnBuffering;
             mediaPlayer.Play();
             mre.WaitOne(TimeSpan.FromSeconds(5));
@@ -205,17 +213,20 @@ namespace Griffeye.VlcWrapper.MediaPlayer
 
         public void SetVolume(int volume) { mediaPlayer.Volume = volume; }
 
-        public void SetMute(bool mute)
-        {
-            mediaPlayer.Mute = mute;
-        }
+        public void SetMute(bool mute){ mediaPlayer.Mute = mute; }
 
         public bool CreateSnapshot(int numberOfVideoOutput, int width, int height, string filePath)
         {
+            bool success = true;
             using var mre = new ManualResetEventSlim();
+
             mediaPlayer.SnapshotTaken += MediaPlayerOnSnapshotTaken;
             mediaPlayer.TakeSnapshot((uint)numberOfVideoOutput, filePath, (uint)width, (uint)height);
-            mre.Wait();
+            if(!mre.Wait(TimeSpan.FromSeconds(1)) && !File.Exists(filePath))
+            {
+                logger.LogWarning("Timed out when creating snapshot");
+                success = false;
+            }
             mediaPlayer.SnapshotTaken -= MediaPlayerOnSnapshotTaken;
 
             void MediaPlayerOnSnapshotTaken(object sender, MediaPlayerSnapshotTakenEventArgs e)
@@ -223,7 +234,7 @@ namespace Griffeye.VlcWrapper.MediaPlayer
                 mre.Set();
             }
 
-            return true;
+            return success;
         }
 
         public List<(int, string)> GetAudioTracks()
@@ -240,20 +251,13 @@ namespace Griffeye.VlcWrapper.MediaPlayer
             return videoTrackDescription.Select(description => (description.Id, description.Name)).ToList();
         }
 
-        public void SetAudioTrack(int trackId)
-        {
-            mediaPlayer.SetAudioTrack(trackId);
-        }
+        public void SetAudioTrack(int trackId){  mediaPlayer.SetAudioTrack(trackId); }
 
-        public void SetVideoTrack(int trackId)
-        {
-            mediaPlayer.SetVideoTrack(trackId);
-        }
-        private long time;
+        public void SetVideoTrack(int trackId) { mediaPlayer.SetVideoTrack(trackId); }
+
         public void StepForward()
         {
             mediaPlayer.NextFrame();
-
             time += (long)(1000 / mediaPlayer.Fps);
             TimeChanged?.Invoke(this, time);
         }
@@ -261,7 +265,6 @@ namespace Griffeye.VlcWrapper.MediaPlayer
         public void StepBack()
         {
             mediaPlayer.SetPause(true);
-
             time -= (long)(1000 / mediaPlayer.Fps);
             Seek((float)time / mediaPlayer.Length);
         }
