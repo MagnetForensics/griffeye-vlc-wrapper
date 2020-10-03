@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using Griffeye.VideoPlayerContract.Enums;
+﻿using Griffeye.VideoPlayerContract.Enums;
 using Griffeye.VlcWrapper.Models;
 using LibVLCSharp.Shared;
+using System;
+using System.Collections.Generic;
 
 namespace Griffeye.VlcWrapper.MediaPlayer
 {
@@ -34,5 +34,9 @@ namespace Griffeye.VlcWrapper.MediaPlayer
         List<(int, string)> GetVideoTracks();
         void SetAudioTrack(int trackId);
         void SetVideoTrack(int trackId);
+        void SetImageOption(ImageOption option, float value);
+        void EnableImageOptions(bool enable);
+        void EnableHardwareDecoding(bool enable);
+        void AddMediaOption(string option);
     }
 }

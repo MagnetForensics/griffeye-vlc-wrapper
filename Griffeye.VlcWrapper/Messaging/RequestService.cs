@@ -1,8 +1,8 @@
-﻿using System.IO;
-using Griffeye.VideoPlayerContract.Messages.Requests;
+﻿using Griffeye.VideoPlayerContract.Messages.Requests;
 using Griffeye.VlcWrapper.MediaPlayer;
 using Griffeye.VlcWrapper.Messaging.Interfaces;
 using Microsoft.Extensions.Logging;
+using System.IO;
 
 namespace Griffeye.VlcWrapper.Messaging
 {
@@ -17,10 +17,7 @@ namespace Griffeye.VlcWrapper.Messaging
             this.logger = logger;
         }
 
-        public bool IsQuitMessage(BaseRequest message)
-        {
-            return message is Quit _;
-        }
+        public bool IsQuitMessage(BaseRequest message) => message is Quit _;
 
         public bool CanHandleMessage(IMediaPlayer mediaPlayer, BaseRequest message, Stream outStream)
         {
@@ -66,6 +63,10 @@ namespace Griffeye.VlcWrapper.Messaging
                 case StepForward _: mediaPlayer.StepForward(); break;
                 case StepBack _: mediaPlayer.StepBack(); break;
                 case Seek m: mediaPlayer.Seek(m.Position); break;
+                case SetImageOption m: mediaPlayer.SetImageOption(m.Option, m.Value); break;
+                case EnableImageOptions m: mediaPlayer.EnableImageOptions(m.Enable); break;
+                case EnableHardwareDecoding m: mediaPlayer.EnableHardwareDecoding(m.Enable); break;
+                case AddMediaOption m: mediaPlayer.AddMediaOption(m.Option); break;
                 default: return false;
             }
 

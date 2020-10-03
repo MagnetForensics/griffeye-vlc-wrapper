@@ -20,7 +20,11 @@ namespace Griffeye.VideoPlayerContract.Messages.Requests
     [ProtoInclude(2100, typeof(Quit))]
     [ProtoInclude(2200, typeof(StepForward))]
     [ProtoInclude(2600, typeof(StepBack))]
-    
+    [ProtoInclude(2700, typeof(SetImageOption))]
+    [ProtoInclude(2800, typeof(EnableImageOptions))]
+    [ProtoInclude(2900, typeof(EnableHardwareDecoding))]
+    [ProtoInclude(3000, typeof(AddMediaOption))]
+
     public class BaseRequest
     {
         public int SequenceNumber { get; set; }

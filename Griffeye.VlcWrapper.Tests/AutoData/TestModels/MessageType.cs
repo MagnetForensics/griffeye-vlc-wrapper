@@ -4,6 +4,7 @@
     {
         Play, Pause, LocalFileStreamDisconnect, PlaybackSpeed, StepForward, StepBack, Seek,
         Load, LocalFileStreamConnect, CreateSnapshot, Volume, Mute, InvalidCast,
-        SetAudioTrack, SetVideoTrack, GetVideoTracks, GetAudioTracks
+        SetAudioTrack, SetVideoTrack, GetVideoTracks, GetAudioTracks,
+        EnableImageOption, EnableHardwareDecoding, SetImageOption, AddMediaOption
     }
 }

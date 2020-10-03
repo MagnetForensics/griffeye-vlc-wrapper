@@ -1,14 +1,14 @@
-﻿using System;
+﻿using Griffeye.VideoPlayerContract.Enums;
+using Griffeye.VlcWrapper.Models;
+using LibVLCSharp.Shared;
+using Microsoft.Extensions.Logging;
+using SSG.LocalFileStreamClient;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Griffeye.VideoPlayerContract.Enums;
-using Griffeye.VlcWrapper.Models;
-using LibVLCSharp.Shared;
-using Microsoft.Extensions.Logging;
-using SSG.LocalFileStreamClient;
 
 namespace Griffeye.VlcWrapper.MediaPlayer
 {
@@ -75,11 +75,11 @@ namespace Griffeye.VlcWrapper.MediaPlayer
             };
             mediaPlayer.PositionChanged += MediaPlayer_PositionChanged;
             mediaPlayer.EndReached += (sender, args) =>
-            {                
+            {
                 EndReached?.Invoke(this, args);
             };
             mediaPlayer.TimeChanged += (sender, args) =>
-            {                
+            {
                 time = args.Time;
                 TimeChanged?.Invoke(this, args.Time);
 
@@ -126,8 +126,8 @@ namespace Griffeye.VlcWrapper.MediaPlayer
         }
 
         private void MediaPlayer_PositionChanged(object sender, MediaPlayerPositionChangedEventArgs e)
-        {            
-            if (e.Position >= stopPosition) { Task.Run(() => { mediaPlayer.SetPause(true); });}
+        {
+            if (e.Position >= stopPosition) { Task.Run(() => { mediaPlayer.SetPause(true); }); }
         }
 
         private static bool IsFlipped(VideoOrientation orientation)
@@ -137,10 +137,7 @@ namespace Griffeye.VlcWrapper.MediaPlayer
                    orientation == VideoOrientation.RightBottom;
         }
 
-        private void Library_Log(object sender, LogEventArgs e)
-        {
-            logger.LogDebug("{Module} {Level} {Message}", e.Module, e.Level, e.Message);
-        }
+        private void Library_Log(object sender, LogEventArgs e) => logger.LogDebug("{Module} {Level} {Message}", e.Module, e.Level, e.Message);
 
         public void ConnectLocalFileStream(string pipeName) { localFileStreamClient.Connect(pipeName); }
 
@@ -213,7 +210,7 @@ namespace Griffeye.VlcWrapper.MediaPlayer
 
         public void SetVolume(int volume) { mediaPlayer.Volume = volume; }
 
-        public void SetMute(bool mute){ mediaPlayer.Mute = mute; }
+        public void SetMute(bool mute) { mediaPlayer.Mute = mute; }
 
         public bool CreateSnapshot(int numberOfVideoOutput, int width, int height, string filePath)
         {
@@ -222,7 +219,7 @@ namespace Griffeye.VlcWrapper.MediaPlayer
 
             mediaPlayer.SnapshotTaken += MediaPlayerOnSnapshotTaken;
             mediaPlayer.TakeSnapshot((uint)numberOfVideoOutput, filePath, (uint)width, (uint)height);
-            if(!mre.Wait(TimeSpan.FromSeconds(1)) && !File.Exists(filePath))
+            if (!mre.Wait(TimeSpan.FromSeconds(1)) && !File.Exists(filePath))
             {
                 logger.LogWarning("Timed out when creating snapshot");
                 success = false;
@@ -251,7 +248,7 @@ namespace Griffeye.VlcWrapper.MediaPlayer
             return videoTrackDescription.Select(description => (description.Id, description.Name)).ToList();
         }
 
-        public void SetAudioTrack(int trackId){  mediaPlayer.SetAudioTrack(trackId); }
+        public void SetAudioTrack(int trackId) { mediaPlayer.SetAudioTrack(trackId); }
 
         public void SetVideoTrack(int trackId) { mediaPlayer.SetVideoTrack(trackId); }
 
@@ -268,6 +265,14 @@ namespace Griffeye.VlcWrapper.MediaPlayer
             time -= (long)(1000 / mediaPlayer.Fps);
             Seek((float)time / mediaPlayer.Length);
         }
+
+        public void SetImageOption(ImageOption option, float value) => mediaPlayer.SetAdjustFloat((VideoAdjustOption)option, value);
+
+        public void EnableImageOptions(bool enable) => mediaPlayer.SetAdjustInt(VideoAdjustOption.Enable, enable ? 1 : 0);
+
+        public void EnableHardwareDecoding(bool enable) => mediaPlayer.EnableHardwareDecoding = enable;
+
+        public void AddMediaOption(string option) => mediaPlayer.Media.AddOption(option);
 
         public void Dispose()
         {
