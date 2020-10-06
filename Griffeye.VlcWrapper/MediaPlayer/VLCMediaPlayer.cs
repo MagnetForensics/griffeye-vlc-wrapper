@@ -143,7 +143,7 @@ namespace Griffeye.VlcWrapper.MediaPlayer
 
         public void DisconnectLocalFileStream() { localFileStreamClient.Disconnect(); }
 
-        public void Play() { mediaPlayer.Play(); }
+        public void Play() => mediaPlayer.Play();
 
         public void Pause() { mediaPlayer.SetPause(true); }
 
@@ -168,6 +168,9 @@ namespace Griffeye.VlcWrapper.MediaPlayer
             this.stopPosition = stopPosition;
 
             aspectRationSet = false;
+
+            // Vlc crashes if image options are enabled when changing video.            
+            EnableImageOptions(false);
 
             if (type == StreamType.LocalFileStream)
             {
