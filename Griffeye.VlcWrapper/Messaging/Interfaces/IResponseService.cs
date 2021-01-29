@@ -8,6 +8,5 @@ namespace Griffeye.VlcWrapper.Messaging.Interfaces
     {
         public void ReturnEmptyResponse(Stream outStream, BaseRequest message);
         public void ReturnResultResponse(Stream outStream, BaseRequest message, bool success);
-        public void ReturnResultResponse(Stream outStream, BaseRequest message, List<(int, string)> tracks);
     }
 }

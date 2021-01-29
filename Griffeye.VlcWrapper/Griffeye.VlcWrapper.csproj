@@ -8,14 +8,13 @@
     <PublishTrimmed>true</PublishTrimmed>
     <PublishReadyToRun>true</PublishReadyToRun>
     <PublishSingleFile>true</PublishSingleFile>
-    <Authors>Robin Gustavsson, Adam Sällergård</Authors>
+    <Authors>Robin Andersson, Adam Sällergård</Authors>
     <Company>Griffeye Technologies</Company>
     <Product>VlcWrapper</Product>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/griffeye/videoplayer</PackageProjectUrl>
     <RepositoryUrl>https://github.com/griffeye/videoplayer</RepositoryUrl>
-    <AssemblyVersion>3.0.0.0</AssemblyVersion>
-    <FileVersion>3.0.10.0</FileVersion>
+    <Version>4.0.0</Version>
     <ApplicationIcon>griffeye-icon-64x64.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>

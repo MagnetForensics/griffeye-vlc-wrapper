@@ -1,4 +1,5 @@
 ﻿using Griffeye.VideoPlayerContract.Enums;
+using Griffeye.VideoPlayerContract.Models;
 using Griffeye.VlcWrapper.Models;
 using LibVLCSharp.Shared;
 using Microsoft.Extensions.Logging;
@@ -35,6 +36,7 @@ namespace Griffeye.VlcWrapper.MediaPlayer
         public event EventHandler<MediaPlayerVolumeChangedEventArgs> VolumeChanged;
         public event EventHandler<EventArgs> Unmuted;
         public event EventHandler<EventArgs> Muted;
+        public event EventHandler<TrackInformation> MediaTrackChanged;
 
         private readonly List<string> vlcArguments = new List<string>
         {
@@ -93,7 +95,7 @@ namespace Griffeye.VlcWrapper.MediaPlayer
 
                 if (!mediaPlayer.Size(0, ref x, ref y)) { return; }
 
-                var videoTrack = mediaPlayer.Media.Tracks.FirstOrDefault(track => track.TrackType == TrackType.Video);
+                var videoTrack = mediaPlayer.Media.Tracks.FirstOrDefault(track => track.TrackType == LibVLCSharp.Shared.TrackType.Video);
                 var orientation = videoTrack.Data.Video.Orientation;
 
                 if (IsFlipped(orientation))
@@ -113,7 +115,8 @@ namespace Griffeye.VlcWrapper.MediaPlayer
                 VideoInfoChanged?.Invoke(this, new VideoInfo
                 {
                     VideoOrientation = orientation.ToString(),
-                    AspectRatio = aspectRatio
+                    AspectRatio = aspectRatio,
+                    MediaTracks = GetTrackInformation()
                 });
             };
 
@@ -237,24 +240,6 @@ namespace Griffeye.VlcWrapper.MediaPlayer
             return success;
         }
 
-        public List<(int, string)> GetAudioTracks()
-        {
-            var audioTrackDescription = mediaPlayer.AudioTrackDescription;
-
-            return audioTrackDescription.Select(description => (description.Id, description.Name)).ToList();
-        }
-
-        public List<(int, string)> GetVideoTracks()
-        {
-            var videoTrackDescription = mediaPlayer.VideoTrackDescription;
-
-            return videoTrackDescription.Select(description => (description.Id, description.Name)).ToList();
-        }
-
-        public void SetAudioTrack(int trackId) { mediaPlayer.SetAudioTrack(trackId); }
-
-        public void SetVideoTrack(int trackId) { mediaPlayer.SetVideoTrack(trackId); }
-
         public void StepForward()
         {
             mediaPlayer.NextFrame();
@@ -276,6 +261,77 @@ namespace Griffeye.VlcWrapper.MediaPlayer
         public void EnableHardwareDecoding(bool enable) => mediaPlayer.EnableHardwareDecoding = enable;
 
         public void AddMediaOption(string option) => mediaPlayer.Media.AddOption(option);
+
+        public void SetMediaTrack(VideoPlayerContract.Enums.TrackType trackType, int trackId)
+        {
+            switch (trackType)
+            {
+                case VideoPlayerContract.Enums.TrackType.Audio when mediaPlayer.AudioTrack == trackId:
+                case VideoPlayerContract.Enums.TrackType.Video when mediaPlayer.VideoTrack == trackId:
+                    return;
+                case VideoPlayerContract.Enums.TrackType.Audio:
+                    mediaPlayer.SetAudioTrack(trackId);
+                    MediaTrackChanged?.Invoke(this, new TrackInformation { TrackId = trackId, TrackType = VideoPlayerContract.Enums.TrackType.Audio });
+                    break;
+                case VideoPlayerContract.Enums.TrackType.Video:
+                    mediaPlayer.SetVideoTrack(trackId);
+                    MediaTrackChanged?.Invoke(this, new TrackInformation { TrackId = trackId, TrackType = VideoPlayerContract.Enums.TrackType.Video });
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(trackType), trackType, null);
+            }
+        }
+
+        private List<TrackInformation> GetTrackInformation()
+        {
+            var list = new List<TrackInformation>();            
+            var videoTracks = mediaPlayer.VideoTrackDescription;
+            var audioTracks = mediaPlayer.AudioTrackDescription;
+
+            foreach (var track in videoTracks)
+            {
+                var trackInformation = new TrackInformation
+                {
+                    TrackId = track.Id,
+                    TrackType = VideoPlayerContract.Enums.TrackType.Video,
+                    Description = track.Name,
+                    Codec = "unknown",
+                    Bitrate = uint.MinValue,
+                    IsActive = IsActiveTrack(VideoPlayerContract.Enums.TrackType.Video, track.Id)
+                };
+
+                list.Add(trackInformation);
+            }
+
+            foreach (var track in audioTracks)
+            {
+                var trackInformation = new TrackInformation
+                {
+                    TrackId = track.Id,
+                    TrackType = VideoPlayerContract.Enums.TrackType.Audio,
+                    Description = track.Name,
+                    Codec = "unknown",
+                    Bitrate = uint.MinValue,
+                    IsActive = IsActiveTrack(VideoPlayerContract.Enums.TrackType.Audio, track.Id)
+                };
+
+                list.Add(trackInformation);
+            }
+
+            return list;
+        }
+
+        private bool IsActiveTrack(VideoPlayerContract.Enums.TrackType type, int trackId)
+        {
+            switch (type)
+            {
+                case VideoPlayerContract.Enums.TrackType.Audio when trackId == mediaPlayer.AudioTrack:
+                case VideoPlayerContract.Enums.TrackType.Video when trackId == mediaPlayer.VideoTrack:
+                    return true;
+                default:
+                    return false;
+            }
+        }
 
         public void Dispose()
         {

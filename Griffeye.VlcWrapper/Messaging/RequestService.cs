@@ -38,8 +38,6 @@ namespace Griffeye.VlcWrapper.Messaging
                 case Load m: mediaPlayer.LoadMedia(m.Type, m.FileToLoad, m.StartPosition, m.StopPosition); break;
                 case LocalFileStreamConnect m: mediaPlayer.ConnectLocalFileStream(m.PipeName); break;
                 case CreateSnapshot m: success = mediaPlayer.CreateSnapshot(m.NumberOfVideoOutput, m.Width, m.Height, m.FilePath); break;
-                case GetAudioTracks _: responseService.ReturnResultResponse(outStream, message, mediaPlayer.GetAudioTracks()); return true;
-                case GetVideoTracks _: responseService.ReturnResultResponse(outStream, message, mediaPlayer.GetVideoTracks()); return true;
                 default: return false;
             }
 
@@ -55,8 +53,6 @@ namespace Griffeye.VlcWrapper.Messaging
                 case SetVolume m: mediaPlayer.SetVolume(m.Volume); break;
                 case SetMute m: mediaPlayer.SetMute(m.IsMuted); break;
                 case SetPlaybackSpeed m: mediaPlayer.SetPlaybackSpeed(m.Speed); break;
-                case SetAudioTrack m: mediaPlayer.SetAudioTrack(m.TrackId); break;
-                case SetVideoTrack m: mediaPlayer.SetVideoTrack(m.TrackId); break;
                 case Play _: mediaPlayer.Play(); break;
                 case Pause _: mediaPlayer.Pause(); break;
                 case LocalFileStreamDisconnect _: mediaPlayer.DisconnectLocalFileStream(); break;
@@ -67,6 +63,7 @@ namespace Griffeye.VlcWrapper.Messaging
                 case EnableImageOptions m: mediaPlayer.EnableImageOptions(m.Enable); break;
                 case EnableHardwareDecoding m: mediaPlayer.EnableHardwareDecoding(m.Enable); break;
                 case AddMediaOption m: mediaPlayer.AddMediaOption(m.Option); break;
+                case SetMediaTrack m: mediaPlayer.SetMediaTrack(m.TrackType, m.TrackId); break;
                 default: return false;
             }
 

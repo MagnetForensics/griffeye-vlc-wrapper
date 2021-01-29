@@ -1,8 +1,8 @@
 ﻿using Griffeye.VideoPlayerContract.Enums;
+using Griffeye.VideoPlayerContract.Models;
 using Griffeye.VlcWrapper.Models;
 using LibVLCSharp.Shared;
 using System;
-using System.Collections.Generic;
 
 namespace Griffeye.VlcWrapper.MediaPlayer
 {
@@ -17,6 +17,7 @@ namespace Griffeye.VlcWrapper.MediaPlayer
         event EventHandler<MediaPlayerVolumeChangedEventArgs> VolumeChanged;
         event EventHandler<EventArgs> Unmuted;
         event EventHandler<EventArgs> Muted;
+        event EventHandler<TrackInformation> MediaTrackChanged;
 
         public void ConnectLocalFileStream(string pipeName);
         void Play();
@@ -30,13 +31,10 @@ namespace Griffeye.VlcWrapper.MediaPlayer
         void StepBack();
         void DisconnectLocalFileStream();
         bool CreateSnapshot(int numberOfVideoOutput, int width, int height, string filePath);
-        List<(int, string)> GetAudioTracks();
-        List<(int, string)> GetVideoTracks();
-        void SetAudioTrack(int trackId);
-        void SetVideoTrack(int trackId);
         void SetImageOption(ImageOption option, float value);
         void EnableImageOptions(bool enable);
         void EnableHardwareDecoding(bool enable);
         void AddMediaOption(string option);
+        void SetMediaTrack(VideoPlayerContract.Enums.TrackType trackType, int trackId);
     }
 }

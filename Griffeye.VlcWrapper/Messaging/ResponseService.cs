@@ -35,13 +35,5 @@ namespace Griffeye.VlcWrapper.Messaging
                 "Returning result response with {Sequence} and {Result}", message.SequenceNumber, success);
             messageSerializer.SerializeWithLengthPrefix(outStream, response, PrefixStyle.Base128);
         }
-
-        public void ReturnResultResponse(Stream outStream, BaseRequest message, List<(int, string)> tracks)
-        {
-            var response = new TracksResponse(tracks, message.SequenceNumber);
-
-            logger.LogDebug("Returning result response with {Sequence} and {Result}", message.SequenceNumber, tracks);
-            messageSerializer.SerializeWithLengthPrefix(outStream, response, PrefixStyle.Base128);
-        }
     }
 }

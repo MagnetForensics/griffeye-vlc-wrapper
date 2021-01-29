@@ -39,14 +39,11 @@ namespace Griffeye.VlcWrapper.Tests.Tests
             [BaseRequestMessageData(MessageType.CreateSnapshot)]
             [BaseRequestMessageData(MessageType.Volume)]
             [BaseRequestMessageData(MessageType.Mute)]
-            [BaseRequestMessageData(MessageType.GetAudioTracks)]
-            [BaseRequestMessageData(MessageType.GetVideoTracks)]
-            [BaseRequestMessageData(MessageType.SetVideoTrack)]
-            [BaseRequestMessageData(MessageType.SetAudioTrack)]
             [BaseRequestMessageData(MessageType.EnableImageOption)]
             [BaseRequestMessageData(MessageType.EnableHardwareDecoding)]
             [BaseRequestMessageData(MessageType.SetImageOption)]
             [BaseRequestMessageData(MessageType.AddMediaOption)]
+            [BaseRequestMessageData(MessageType.SetMediaTrack)]
             public void ReturnTrueIfValidMessageType(Stream outStream, BaseRequest message,
                 IMediaPlayer mediaPlayer, RequestService sut)
             {
@@ -165,19 +162,11 @@ namespace Griffeye.VlcWrapper.Tests.Tests
             }
 
             [Theory, AutoNSubstituteData]
-            public void CallSetAudioTrackOnIMediaPlayer([Frozen] IMediaPlayer mediaPlayer,
-                Stream outStream, SetAudioTrack message, RequestService sut)
+            public void CallSetMediaTrackOnIMediaPlayer([Frozen] IMediaPlayer mediaPlayer,
+                Stream outStream, SetMediaTrack message, RequestService sut)
             {
                 sut.CanHandleMessage(mediaPlayer, message, outStream);
-                mediaPlayer.Received(1).SetAudioTrack(message.TrackId);
-            }
-
-            [Theory, AutoNSubstituteData]
-            public void CallSetVideoTrackOnIMediaPlayer([Frozen] IMediaPlayer mediaPlayer,
-                Stream outStream, SetVideoTrack message, RequestService sut)
-            {
-                sut.CanHandleMessage(mediaPlayer, message, outStream);
-                mediaPlayer.Received(1).SetVideoTrack(message.TrackId);
+                mediaPlayer.Received(1).SetMediaTrack(message.TrackType, message.TrackId);
             }
 
             [Theory, AutoNSubstituteData]
@@ -202,22 +191,6 @@ namespace Griffeye.VlcWrapper.Tests.Tests
             {
                 sut.CanHandleMessage(mediaPlayer, message, outStream);
                 mediaPlayer.Received(1).AddMediaOption(message.Option);
-            }
-
-            [Theory, AutoNSubstituteData]
-            public void CallGetAudioTracksOnIMediaPlayer([Frozen] IMediaPlayer mediaPlayer,
-                Stream outStream, GetAudioTracks message, RequestService sut)
-            {
-                sut.CanHandleMessage(mediaPlayer, message, outStream);
-                mediaPlayer.Received(1).GetAudioTracks();
-            }
-
-            [Theory, AutoNSubstituteData]
-            public void CallGetVideoTracksOnIMediaPlayer([Frozen] IMediaPlayer mediaPlayer,
-                Stream outStream, GetVideoTracks message, RequestService sut)
-            {
-                sut.CanHandleMessage(mediaPlayer, message, outStream);
-                mediaPlayer.Received(1).GetVideoTracks();
             }
 
             /* Use Response Service For Execute Result Response Messages */
@@ -246,22 +219,6 @@ namespace Griffeye.VlcWrapper.Tests.Tests
                 responseService.Received(1).ReturnResultResponse(outStream, message, Arg.Any<bool>());
             }
 
-            [Theory, AutoNSubstituteData]
-            public void CallReturnResultResponseOnIResponseServiceForGetAudioTracks([Frozen] IResponseService responseService,
-                IMediaPlayer mediaPlayer, Stream outStream, GetAudioTracks message, RequestService sut)
-            {
-                sut.CanHandleMessage(mediaPlayer, message, outStream);
-                responseService.Received(1).ReturnResultResponse(outStream, message, Arg.Any<List<(int, string)>>());
-            }
-
-            [Theory, AutoNSubstituteData]
-            public void CallReturnResultResponseOnIResponseServiceForGetVideoTracks([Frozen] IResponseService responseService,
-                IMediaPlayer mediaPlayer, Stream outStream, GetVideoTracks message, RequestService sut)
-            {
-                sut.CanHandleMessage(mediaPlayer, message, outStream);
-                responseService.Received(1).ReturnResultResponse(outStream, message, Arg.Any<List<(int, string)>>());
-            }
-
             /* Use Response Service For Execute Empty Response Messages */
 
             [BaseRequestMessageData(MessageType.Play)]
@@ -274,6 +231,7 @@ namespace Griffeye.VlcWrapper.Tests.Tests
             [BaseRequestMessageData(MessageType.EnableHardwareDecoding)]
             [BaseRequestMessageData(MessageType.SetImageOption)]
             [BaseRequestMessageData(MessageType.AddMediaOption)]
+            [BaseRequestMessageData(MessageType.SetMediaTrack)]
             public void CallReturnEmptyResponseOnIResponseService([Frozen] IResponseService responseService,
                 IMediaPlayer mediaPlayer, Stream outStream, BaseRequest message, RequestService sut)
             {

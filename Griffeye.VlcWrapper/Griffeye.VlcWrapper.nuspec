@@ -2,8 +2,8 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>Griffeye.VlcWrapper</id>
-    <version>3.0.10</version>
-    <authors>Adam Sällergård, Robin Gustavsson</authors>
+    <version>4.0.0</version>
+    <authors>Adam Sällergård, Robin Andersson</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Griffeye libVLC Wrapper</description>
   </metadata>

@@ -28,10 +28,6 @@ namespace Griffeye.VlcWrapper.Tests.AutoData.Customization
                 case MessageType.Volume: fixture.Register<BaseRequest>(fixture.Create<SetVolume>); break;
                 case MessageType.Mute: fixture.Register<BaseRequest>(fixture.Create<SetMute>); break;
                 case MessageType.InvalidCast: fixture.Register<BaseRequest>(fixture.Create<InvalidCastMessage>); break;
-                case MessageType.SetAudioTrack: fixture.Register<BaseRequest>(fixture.Create<SetAudioTrack>); break;
-                case MessageType.SetVideoTrack: fixture.Register<BaseRequest>(fixture.Create<SetVideoTrack>); break;
-                case MessageType.GetVideoTracks: fixture.Register<BaseRequest>(fixture.Create<GetVideoTracks>); break;
-                case MessageType.GetAudioTracks: fixture.Register<BaseRequest>(fixture.Create<GetAudioTracks>); break;
                 case MessageType.EnableImageOption: fixture.Register<BaseRequest>(fixture.Create<EnableImageOptions>); break;
                 case MessageType.EnableHardwareDecoding: fixture.Register<BaseRequest>(fixture.Create<EnableHardwareDecoding>); break;
                 case MessageType.SetImageOption:
@@ -39,6 +35,7 @@ namespace Griffeye.VlcWrapper.Tests.AutoData.Customization
                     fixture.Register<BaseRequest>(fixture.Create<SetImageOption>);
                     break;
                 case MessageType.AddMediaOption: fixture.Register<BaseRequest>(fixture.Create<AddMediaOption>); break;
+                case MessageType.SetMediaTrack: fixture.Register<BaseRequest>(fixture.Create<SetMediaTrack>); break;
                 default: throw new ArgumentOutOfRangeException();
             }
 

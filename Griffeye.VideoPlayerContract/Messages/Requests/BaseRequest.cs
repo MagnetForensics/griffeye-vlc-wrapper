@@ -4,12 +4,9 @@ namespace Griffeye.VideoPlayerContract.Messages.Requests
 {
     [ProtoContract(ImplicitFields = ImplicitFields.AllPublic)]
     [ProtoInclude(200, typeof(CreateSnapshot))]
-    [ProtoInclude(300, typeof(SetAudioTrack))]
-    [ProtoInclude(400, typeof(SetVideoTrack))]
+    [ProtoInclude(300, typeof(SetMediaTrack))]
     [ProtoInclude(500, typeof(Load))]
     [ProtoInclude(600, typeof(LocalFileStreamConnect))]
-    [ProtoInclude(700, typeof(GetAudioTracks))]
-    [ProtoInclude(800, typeof(GetVideoTracks))]
     [ProtoInclude(900, typeof(Seek))]
     [ProtoInclude(1100, typeof(SetMute))]
     [ProtoInclude(1200, typeof(SetPlaybackSpeed))]

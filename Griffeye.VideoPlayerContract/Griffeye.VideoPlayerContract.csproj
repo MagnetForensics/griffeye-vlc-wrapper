@@ -9,12 +9,10 @@
         <PackageProjectUrl>https://github.com/griffeye/videoplayer</PackageProjectUrl>
         <Company>Griffeye Technologies</Company>
         <Product>VideoPlayerContract</Product>
-        <Authors>Robin Gustavsson, Adam Sällergård</Authors>
+        <Authors>Robin Andersson, Adam Sällergård</Authors>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
         <PackageLicenseExpression></PackageLicenseExpression>
-        <AssemblyVersion>3.1.0.0</AssemblyVersion>
-        <FileVersion>3.1.0.0</FileVersion>
-        <PackageVersion>3.1.0</PackageVersion>
+        <Version>4.0.0</Version>
     </PropertyGroup>
 
     <ItemGroup>
