@@ -48,7 +48,7 @@ namespace Griffeye.VlcWrapper.Messaging
                 logger.LogDebug("Video info changed event triggered.");
                 messageSerializer
                     .SerializeWithLengthPrefix(eventStream,
-                    new MediaInfoEvent(a.AspectRatio, a.VideoOrientation, a.MediaTracks), PrefixStyle.Base128);
+                    new MediaInfoEvent(a.AspectRatio, a.VideoOrientation), PrefixStyle.Base128);
             };
             
             mediaPlayer.Playing += (s, a) =>
@@ -86,11 +86,11 @@ namespace Griffeye.VlcWrapper.Messaging
                     .SerializeWithLengthPrefix(eventStream, new UnmutedEvent(), PrefixStyle.Base128);
             };
 
-            mediaPlayer.MediaTrackChanged += (s, a) =>
+            mediaPlayer.MediaTracksChanged += (s, a) =>
             {
                 logger.LogDebug("Media track event triggered.");
                 messageSerializer
-                    .SerializeWithLengthPrefix(eventStream, new MediaTrackChangedEvent(a.TrackType, a.TrackId), PrefixStyle.Base128);
+                    .SerializeWithLengthPrefix(eventStream, new MediaTrackChangedEvent(a.MediaTracks), PrefixStyle.Base128);
             };
         }
     }

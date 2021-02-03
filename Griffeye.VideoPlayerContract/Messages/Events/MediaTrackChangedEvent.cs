@@ -1,18 +1,17 @@
-﻿using Griffeye.VideoPlayerContract.Enums;
+﻿using Griffeye.VideoPlayerContract.Models;
 using ProtoBuf;
+using System.Collections.Generic;
 
 namespace Griffeye.VideoPlayerContract.Messages.Events
 {
     [ProtoContract(ImplicitFields = ImplicitFields.AllPublic)]
     public class MediaTrackChangedEvent : VideoPlayerEvent
     {
-        public TrackType TrackType { get; private set; }
-        public int TrackId { get; private set; }
+        public List<TrackInformation> MediaTracks { get; set; }
 
-        public MediaTrackChangedEvent(TrackType trackType, int trackId)
+        public MediaTrackChangedEvent(List<TrackInformation> mediaTracks)
         {
-            TrackType = trackType;
-            TrackId = trackId;
+            MediaTracks = mediaTracks;
         }
 
         public MediaTrackChangedEvent() { }

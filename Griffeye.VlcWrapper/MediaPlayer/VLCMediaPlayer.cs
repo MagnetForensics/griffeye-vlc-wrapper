@@ -1,4 +1,5 @@
 ﻿using Griffeye.VideoPlayerContract.Enums;
+using Griffeye.VideoPlayerContract.Messages.Events;
 using Griffeye.VideoPlayerContract.Models;
 using Griffeye.VlcWrapper.Models;
 using LibVLCSharp.Shared;
@@ -36,7 +37,7 @@ namespace Griffeye.VlcWrapper.MediaPlayer
         public event EventHandler<MediaPlayerVolumeChangedEventArgs> VolumeChanged;
         public event EventHandler<EventArgs> Unmuted;
         public event EventHandler<EventArgs> Muted;
-        public event EventHandler<TrackInformation> MediaTrackChanged;
+        public event EventHandler<MediaTrackChangedEvent> MediaTracksChanged;
 
         private readonly List<string> vlcArguments = new List<string>
         {
@@ -115,9 +116,10 @@ namespace Griffeye.VlcWrapper.MediaPlayer
                 VideoInfoChanged?.Invoke(this, new VideoInfo
                 {
                     VideoOrientation = orientation.ToString(),
-                    AspectRatio = aspectRatio,
-                    MediaTracks = GetTrackInformation()
+                    AspectRatio = aspectRatio
                 });
+
+                MediaTracksChanged?.Invoke(this, new MediaTrackChangedEvent(GetTrackInformation()));
             };
 
             mediaPlayer.LengthChanged += (sender, args) => { if (args.Length > 0) { LengthChanged?.Invoke(this, args); } };
@@ -158,6 +160,7 @@ namespace Griffeye.VlcWrapper.MediaPlayer
             {
                 mediaPlayer.Stop();
                 PlayUntillBuffered();
+                MediaTracksChanged?.Invoke(this, new MediaTrackChangedEvent(GetTrackInformation()));
             }
 
             mediaPlayer.Position = allowedPosition;
@@ -271,11 +274,11 @@ namespace Griffeye.VlcWrapper.MediaPlayer
                     return;
                 case VideoPlayerContract.Enums.TrackType.Audio:
                     mediaPlayer.SetAudioTrack(trackId);
-                    MediaTrackChanged?.Invoke(this, new TrackInformation { TrackId = trackId, TrackType = VideoPlayerContract.Enums.TrackType.Audio });
+                    MediaTracksChanged?.Invoke(this, new MediaTrackChangedEvent(GetTrackInformation()));
                     break;
                 case VideoPlayerContract.Enums.TrackType.Video:
                     mediaPlayer.SetVideoTrack(trackId);
-                    MediaTrackChanged?.Invoke(this, new TrackInformation { TrackId = trackId, TrackType = VideoPlayerContract.Enums.TrackType.Video });
+                    MediaTracksChanged?.Invoke(this, new MediaTrackChangedEvent(GetTrackInformation()));
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(trackType), trackType, null);
@@ -290,6 +293,8 @@ namespace Griffeye.VlcWrapper.MediaPlayer
 
             foreach (var track in videoTracks)
             {
+                if(track.Name == "Disable") { continue; }
+
                 var trackInformation = new TrackInformation
                 {
                     TrackId = track.Id,
@@ -305,6 +310,8 @@ namespace Griffeye.VlcWrapper.MediaPlayer
 
             foreach (var track in audioTracks)
             {
+                if (track.Name == "Disable") { continue; }
+
                 var trackInformation = new TrackInformation
                 {
                     TrackId = track.Id,

@@ -1,5 +1,5 @@
 ﻿using Griffeye.VideoPlayerContract.Enums;
-using Griffeye.VideoPlayerContract.Models;
+using Griffeye.VideoPlayerContract.Messages.Events;
 using Griffeye.VlcWrapper.Models;
 using LibVLCSharp.Shared;
 using System;
@@ -17,7 +17,7 @@ namespace Griffeye.VlcWrapper.MediaPlayer
         event EventHandler<MediaPlayerVolumeChangedEventArgs> VolumeChanged;
         event EventHandler<EventArgs> Unmuted;
         event EventHandler<EventArgs> Muted;
-        event EventHandler<TrackInformation> MediaTrackChanged;
+        event EventHandler<MediaTrackChangedEvent> MediaTracksChanged;
 
         public void ConnectLocalFileStream(string pipeName);
         void Play();
