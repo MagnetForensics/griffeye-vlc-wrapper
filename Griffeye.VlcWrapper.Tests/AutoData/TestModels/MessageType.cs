@@ -5,6 +5,6 @@
         Play, Pause, LocalFileStreamDisconnect, PlaybackSpeed, StepForward, StepBack, Seek,
         Load, LocalFileStreamConnect, CreateSnapshot, Volume, Mute, InvalidCast,
         EnableImageOption, EnableHardwareDecoding, SetImageOption, AddMediaOption,
-        SetMediaTrack
+        SetMediaTrack, UnloadMedia
     }
 }

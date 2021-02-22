@@ -24,7 +24,7 @@ namespace Griffeye.VlcWrapper.Tests.Tests
             }
             
             [Theory, AutoNSubstituteData]
-            public void ReturnTrueIfQuitMessage([Frozen]IRequestService requestService, [Frozen]Stream eventStream, [Frozen]Quit message, Stream outStream, MessageService sut)
+            public void ReturnTrueIfQuitMessage([Frozen]Stream eventStream, [Frozen]Quit message, Stream outStream, MessageService sut)
             {
                 sut.Process(message, eventStream, outStream).Should()
                     .BeTrue("Because we should stop process messages after a quit message.");

@@ -8,6 +8,7 @@ namespace Griffeye.VideoPlayerContract.Messages.Requests
     [ProtoInclude(500, typeof(Load))]
     [ProtoInclude(600, typeof(LocalFileStreamConnect))]
     [ProtoInclude(900, typeof(Seek))]
+    [ProtoInclude(1000, typeof(UnloadMedia))]
     [ProtoInclude(1100, typeof(SetMute))]
     [ProtoInclude(1200, typeof(SetPlaybackSpeed))]
     [ProtoInclude(1400, typeof(SetVolume))]

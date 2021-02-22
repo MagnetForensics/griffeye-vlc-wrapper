@@ -36,6 +36,7 @@ namespace Griffeye.VlcWrapper.Tests.AutoData.Customization
                     break;
                 case MessageType.AddMediaOption: fixture.Register<BaseRequest>(fixture.Create<AddMediaOption>); break;
                 case MessageType.SetMediaTrack: fixture.Register<BaseRequest>(fixture.Create<SetMediaTrack>); break;
+                case MessageType.UnloadMedia: fixture.Register<BaseRequest>(fixture.Create<UnloadMedia>); break;
                 default: throw new ArgumentOutOfRangeException();
             }
 

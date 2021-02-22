@@ -64,6 +64,7 @@ namespace Griffeye.VlcWrapper.Messaging
                 case EnableHardwareDecoding m: mediaPlayer.EnableHardwareDecoding(m.Enable); break;
                 case AddMediaOption m: mediaPlayer.AddMediaOption(m.Option); break;
                 case SetMediaTrack m: mediaPlayer.SetMediaTrack(m.TrackType, m.TrackId); break;
+                case UnloadMedia _: mediaPlayer.UnloadMedia(); break;
                 default: return false;
             }
 

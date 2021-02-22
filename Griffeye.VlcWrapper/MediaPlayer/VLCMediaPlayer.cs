@@ -1,7 +1,7 @@
 ﻿using Griffeye.VideoPlayerContract.Enums;
 using Griffeye.VideoPlayerContract.Messages.Events;
-using Griffeye.VideoPlayerContract.Models;
 using Griffeye.VlcWrapper.Models;
+using Griffeye.VlcWrapper.Services;
 using LibVLCSharp.Shared;
 using Microsoft.Extensions.Logging;
 using SSG.LocalFileStreamClient;
@@ -20,9 +20,9 @@ namespace Griffeye.VlcWrapper.MediaPlayer
         private readonly Client localFileStreamClient;
         private readonly LibVLCSharp.Shared.MediaPlayer mediaPlayer;
         private readonly ILogger<VLCMediaPlayer> logger;
-        private Stream currStream;
+        private readonly IMediaTrackService mediaTrackService;
+        private Stream currentStream;
         private StreamMediaInput streamMediaInput;
-
         private bool aspectRationSet;
         private float startPosition;
         private float stopPosition;
@@ -30,6 +30,7 @@ namespace Griffeye.VlcWrapper.MediaPlayer
 
         public event EventHandler<EventArgs> EndReached;
         public event EventHandler<long> TimeChanged;
+        public event EventHandler<float> PositionChanged;
         public event EventHandler<MediaPlayerLengthChangedEventArgs> LengthChanged;
         public event EventHandler<VideoInfo> VideoInfoChanged;
         public event EventHandler<EventArgs> Playing;
@@ -53,11 +54,13 @@ namespace Griffeye.VlcWrapper.MediaPlayer
             "--quiet-synchro"
         };
 
-        public VLCMediaPlayer(InputData inputData, ILogger<VLCMediaPlayer> logger)
+        public VLCMediaPlayer(InputData inputData, ILogger<VLCMediaPlayer> logger, IMediaTrackService mediaTrackService)
         {
             this.logger = logger;
+            this.mediaTrackService = mediaTrackService;
             Core.Initialize();
-            localFileStreamClient = new Client();
+            localFileStreamClient = new Client();       
+
             if (inputData.AttachDebugger)
             {
                 vlcArguments.Add("--verbose=2");
@@ -76,50 +79,13 @@ namespace Griffeye.VlcWrapper.MediaPlayer
                 EnableMouseInput = false,
                 EnableHardwareDecoding = true,
             };
-            mediaPlayer.PositionChanged += MediaPlayer_PositionChanged;
-            mediaPlayer.EndReached += (sender, args) =>
-            {
-                EndReached?.Invoke(this, args);
-            };
+            mediaPlayer.PositionChanged += HandlePositionChanged;
+            mediaPlayer.EndReached += (sender, args) => EndReached?.Invoke(this, args);
             mediaPlayer.TimeChanged += (sender, args) =>
             {
                 time = args.Time;
                 TimeChanged?.Invoke(this, args.Time);
-
-                if (aspectRationSet || mediaPlayer.VideoTrack == -1) { return; }
-
-                aspectRationSet = true;
-
-                uint x = 0;
-                uint y = 0;
-                float aspectRatio = 1;
-
-                if (!mediaPlayer.Size(0, ref x, ref y)) { return; }
-
-                var videoTrack = mediaPlayer.Media.Tracks.FirstOrDefault(track => track.TrackType == LibVLCSharp.Shared.TrackType.Video);
-                var orientation = videoTrack.Data.Video.Orientation;
-
-                if (IsFlipped(orientation))
-                {
-                    aspectRatio = (float)y / x;
-                }
-                else
-                {
-                    aspectRatio = (float)x / y;
-                }
-
-                if (videoTrack.Data.Video.SarDen != 0)
-                {
-                    aspectRatio *= (float)videoTrack.Data.Video.SarNum / videoTrack.Data.Video.SarDen;
-                }
-
-                VideoInfoChanged?.Invoke(this, new VideoInfo
-                {
-                    VideoOrientation = orientation.ToString(),
-                    AspectRatio = aspectRatio
-                });
-
-                MediaTracksChanged?.Invoke(this, new MediaTrackChangedEvent(GetTrackInformation()));
+                SendVideoInformation();
             };
 
             mediaPlayer.LengthChanged += (sender, args) => { if (args.Length > 0) { LengthChanged?.Invoke(this, args); } };
@@ -130,9 +96,43 @@ namespace Griffeye.VlcWrapper.MediaPlayer
             mediaPlayer.Muted += (sender, args) => Muted?.Invoke(this, args);
         }
 
-        private void MediaPlayer_PositionChanged(object sender, MediaPlayerPositionChangedEventArgs e)
+        private void SendVideoInformation()
         {
-            if (e.Position >= stopPosition) { Task.Run(() => { mediaPlayer.SetPause(true); }); }
+            if (aspectRationSet || mediaPlayer.VideoTrack == -1) return;
+
+            aspectRationSet = true;
+
+            uint x = 0;
+            uint y = 0;
+            float aspectRatio = 1;
+
+            if (!mediaPlayer.Size(0, ref x, ref y)) return;
+
+            var videoTrack = mediaPlayer.Media.Tracks.FirstOrDefault(track => track.TrackType == LibVLCSharp.Shared.TrackType.Video);
+            var orientation = videoTrack.Data.Video.Orientation;
+
+            if (IsFlipped(orientation))
+            {
+                aspectRatio = (float)y / x;
+            }
+            else
+            {
+                aspectRatio = (float)x / y;
+            }
+
+            if (videoTrack.Data.Video.SarDen != 0)
+            {
+                aspectRatio *= (float)videoTrack.Data.Video.SarNum / videoTrack.Data.Video.SarDen;
+            }
+
+            VideoInfoChanged?.Invoke(this, new VideoInfo { VideoOrientation = orientation.ToString(), AspectRatio = aspectRatio });
+        }
+
+        private void HandlePositionChanged(object sender, MediaPlayerPositionChangedEventArgs e)
+        {
+            if (e.Position >= stopPosition) { Task.Run(() => mediaPlayer.SetPause(true)); }
+
+            PositionChanged?.Invoke(this, e.Position);
         }
 
         private static bool IsFlipped(VideoOrientation orientation)
@@ -144,13 +144,13 @@ namespace Griffeye.VlcWrapper.MediaPlayer
 
         private void Library_Log(object sender, LogEventArgs e) => logger.LogDebug("{Module} {Level} {Message}", e.Module, e.Level, e.Message);
 
-        public void ConnectLocalFileStream(string pipeName) { localFileStreamClient.Connect(pipeName); }
+        public void ConnectLocalFileStream(string pipeName) => localFileStreamClient.Connect(pipeName);
 
-        public void DisconnectLocalFileStream() { localFileStreamClient.Disconnect(); }
+        public void DisconnectLocalFileStream() => localFileStreamClient.Disconnect();
 
         public void Play() => mediaPlayer.Play();
 
-        public void Pause() { mediaPlayer.SetPause(true); }
+        public void Pause() => mediaPlayer.SetPause(true);
 
         public void Seek(float position)
         {
@@ -160,7 +160,7 @@ namespace Griffeye.VlcWrapper.MediaPlayer
             {
                 mediaPlayer.Stop();
                 PlayUntillBuffered();
-                MediaTracksChanged?.Invoke(this, new MediaTrackChangedEvent(GetTrackInformation()));
+                Task.Run(async () => MediaTracksChanged?.Invoke(this, new MediaTrackChangedEvent(await mediaTrackService.GetTrackInformation(mediaPlayer))));
             }
 
             mediaPlayer.Position = allowedPosition;
@@ -168,11 +168,10 @@ namespace Griffeye.VlcWrapper.MediaPlayer
             TimeChanged?.Invoke(this, time);
         }
 
-        public void LoadMedia(StreamType type, string file, float startPosition, float stopPosition)
+        public async Task LoadMedia(StreamType type, string file, float startPosition, float stopPosition)
         {
             this.startPosition = startPosition;
             this.stopPosition = stopPosition;
-
             aspectRationSet = false;
 
             // Vlc crashes if image options are enabled when changing video.            
@@ -181,12 +180,11 @@ namespace Griffeye.VlcWrapper.MediaPlayer
             if (type == StreamType.LocalFileStream)
             {
                 streamMediaInput?.Dispose();
-                currStream?.Dispose();
-                currStream = localFileStreamClient.OpenStream(file);
-                streamMediaInput = new StreamMediaInput(currStream);
+                currentStream?.Dispose();
+                currentStream = localFileStreamClient.OpenStream(file);
+                streamMediaInput = new StreamMediaInput(currentStream);
 
                 using var media = new Media(library, streamMediaInput);
-
                 mediaPlayer.Media = media;
             }
             else
@@ -195,31 +193,32 @@ namespace Griffeye.VlcWrapper.MediaPlayer
                 mediaPlayer.Media = media;
             }
 
-            PlayUntillBuffered();
+            await mediaPlayer.Media.Parse(MediaParseOptions.ParseLocal);
+            MediaTracksChanged?.Invoke(this, new MediaTrackChangedEvent(await mediaTrackService.GetTrackInformation(mediaPlayer)));
             mediaPlayer.Position = startPosition;
         }
 
         private void PlayUntillBuffered()
         {
-            using var mre = new ManualResetEvent(false);
+            using var manualResetEvent = new ManualResetEvent(false);
 
             mediaPlayer.Buffering += mediaPlayerOnBuffering;
             mediaPlayer.Play();
-            mre.WaitOne(TimeSpan.FromSeconds(5));
+            manualResetEvent.WaitOne(TimeSpan.FromSeconds(5));
             mediaPlayer.Buffering -= mediaPlayerOnBuffering;
             mediaPlayer.SetPause(true);
 
             void mediaPlayerOnBuffering(object sender, MediaPlayerBufferingEventArgs args)
             {
-                if (args.Cache >= 100) { mre.Set(); }
+                if (args.Cache >= 100) { manualResetEvent.Set(); }
             }
         }
 
-        public void SetPlaybackSpeed(float speed) { mediaPlayer.SetRate(speed); }
+        public void SetPlaybackSpeed(float speed) => mediaPlayer.SetRate(speed);
 
-        public void SetVolume(int volume) { mediaPlayer.Volume = volume; }
+        public void SetVolume(int volume) => mediaPlayer.Volume = volume;
 
-        public void SetMute(bool mute) { mediaPlayer.Mute = mute; }
+        public void SetMute(bool mute) => mediaPlayer.Mute = mute;
 
         public bool CreateSnapshot(int numberOfVideoOutput, int width, int height, string filePath)
         {
@@ -228,17 +227,16 @@ namespace Griffeye.VlcWrapper.MediaPlayer
 
             mediaPlayer.SnapshotTaken += MediaPlayerOnSnapshotTaken;
             mediaPlayer.TakeSnapshot((uint)numberOfVideoOutput, filePath, (uint)width, (uint)height);
+
             if (!mre.Wait(TimeSpan.FromSeconds(1)) && !File.Exists(filePath))
             {
                 logger.LogWarning("Timed out when creating snapshot");
                 success = false;
             }
+
             mediaPlayer.SnapshotTaken -= MediaPlayerOnSnapshotTaken;
 
-            void MediaPlayerOnSnapshotTaken(object sender, MediaPlayerSnapshotTakenEventArgs e)
-            {
-                mre.Set();
-            }
+            void MediaPlayerOnSnapshotTaken(object sender, MediaPlayerSnapshotTakenEventArgs e) => mre.Set();
 
             return success;
         }
@@ -265,85 +263,23 @@ namespace Griffeye.VlcWrapper.MediaPlayer
 
         public void AddMediaOption(string option) => mediaPlayer.Media.AddOption(option);
 
-        public void SetMediaTrack(VideoPlayerContract.Enums.TrackType trackType, int trackId)
+        public async Task SetMediaTrack(VideoPlayerContract.Enums.TrackType trackType, int trackId)
         {
-            switch (trackType)
+            if (mediaPlayer.State == VLCState.Ended)
             {
-                case VideoPlayerContract.Enums.TrackType.Audio when mediaPlayer.AudioTrack == trackId:
-                case VideoPlayerContract.Enums.TrackType.Video when mediaPlayer.VideoTrack == trackId:
-                    return;
-                case VideoPlayerContract.Enums.TrackType.Audio:
-                    mediaPlayer.SetAudioTrack(trackId);
-                    MediaTracksChanged?.Invoke(this, new MediaTrackChangedEvent(GetTrackInformation()));
-                    break;
-                case VideoPlayerContract.Enums.TrackType.Video:
-                    mediaPlayer.SetVideoTrack(trackId);
-                    MediaTracksChanged?.Invoke(this, new MediaTrackChangedEvent(GetTrackInformation()));
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(trackType), trackType, null);
+                return;
             }
+
+            mediaTrackService.SetMediaTrack(mediaPlayer, trackType, trackId);
+            MediaTracksChanged?.Invoke(this, new MediaTrackChangedEvent(await mediaTrackService.GetTrackInformation(mediaPlayer)));
         }
 
-        private List<TrackInformation> GetTrackInformation()
-        {
-            var list = new List<TrackInformation>();            
-            var videoTracks = mediaPlayer.VideoTrackDescription;
-            var audioTracks = mediaPlayer.AudioTrackDescription;
-
-            foreach (var track in videoTracks)
-            {
-                if(track.Name == "Disable") { continue; }
-
-                var trackInformation = new TrackInformation
-                {
-                    TrackId = track.Id,
-                    TrackType = VideoPlayerContract.Enums.TrackType.Video,
-                    Description = track.Name,
-                    Codec = "unknown",
-                    Bitrate = uint.MinValue,
-                    IsActive = IsActiveTrack(VideoPlayerContract.Enums.TrackType.Video, track.Id)
-                };
-
-                list.Add(trackInformation);
-            }
-
-            foreach (var track in audioTracks)
-            {
-                if (track.Name == "Disable") { continue; }
-
-                var trackInformation = new TrackInformation
-                {
-                    TrackId = track.Id,
-                    TrackType = VideoPlayerContract.Enums.TrackType.Audio,
-                    Description = track.Name,
-                    Codec = "unknown",
-                    Bitrate = uint.MinValue,
-                    IsActive = IsActiveTrack(VideoPlayerContract.Enums.TrackType.Audio, track.Id)
-                };
-
-                list.Add(trackInformation);
-            }
-
-            return list;
-        }
-
-        private bool IsActiveTrack(VideoPlayerContract.Enums.TrackType type, int trackId)
-        {
-            switch (type)
-            {
-                case VideoPlayerContract.Enums.TrackType.Audio when trackId == mediaPlayer.AudioTrack:
-                case VideoPlayerContract.Enums.TrackType.Video when trackId == mediaPlayer.VideoTrack:
-                    return true;
-                default:
-                    return false;
-            }
-        }
+        public void UnloadMedia() => mediaPlayer.Media?.Dispose();
 
         public void Dispose()
         {
             streamMediaInput?.Dispose();
-            currStream?.Dispose();
+            currentStream?.Dispose();
             mediaPlayer.Dispose();
             library.Dispose();
             localFileStreamClient.Dispose();

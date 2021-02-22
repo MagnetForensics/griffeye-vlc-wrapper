@@ -18,8 +18,7 @@ namespace Griffeye.VlcWrapper.Tests.Tests
         public class IsQuitMessageShould
         {
             [Theory, AutoNSubstituteData]
-            public void ReturnTrueIfQuitMessage(Stream inStream, Stream outStream, Quit message,
-                IMediaPlayer mediaPlayer, RequestService sut)
+            public void ReturnTrueIfQuitMessage(Quit message, RequestService sut)
             {
                 sut.IsQuitMessage(message).Should().BeTrue();
             }
@@ -44,6 +43,8 @@ namespace Griffeye.VlcWrapper.Tests.Tests
             [BaseRequestMessageData(MessageType.SetImageOption)]
             [BaseRequestMessageData(MessageType.AddMediaOption)]
             [BaseRequestMessageData(MessageType.SetMediaTrack)]
+            [BaseRequestMessageData(MessageType.UnloadMedia)]
+
             public void ReturnTrueIfValidMessageType(Stream outStream, BaseRequest message,
                 IMediaPlayer mediaPlayer, RequestService sut)
             {
@@ -55,7 +56,7 @@ namespace Griffeye.VlcWrapper.Tests.Tests
             /* Invalid cast message */
 
             [BaseRequestMessageData(MessageType.InvalidCast)]
-            public void ReturnFalseIfInvalidMessage(IMediaPlayer mediaPlayer, Stream inStream,
+            public void ReturnFalseIfInvalidMessage(IMediaPlayer mediaPlayer,
                 Stream outStream, BaseRequest message, RequestService sut)
             {
                 sut.CanHandleMessage(mediaPlayer, message, outStream).Should()
@@ -193,6 +194,14 @@ namespace Griffeye.VlcWrapper.Tests.Tests
                 mediaPlayer.Received(1).AddMediaOption(message.Option);
             }
 
+            [Theory, ImageOptionData]
+            public void CallUnloadMediaOnIMediaPlayer([Frozen] IMediaPlayer mediaPlayer,
+                Stream outStream, UnloadMedia message, RequestService sut)
+            {
+                sut.CanHandleMessage(mediaPlayer, message, outStream);
+                mediaPlayer.Received(1).UnloadMedia();
+            }
+
             /* Use Response Service For Execute Result Response Messages */
 
             [Theory, AutoNSubstituteData]
@@ -232,6 +241,7 @@ namespace Griffeye.VlcWrapper.Tests.Tests
             [BaseRequestMessageData(MessageType.SetImageOption)]
             [BaseRequestMessageData(MessageType.AddMediaOption)]
             [BaseRequestMessageData(MessageType.SetMediaTrack)]
+            [BaseRequestMessageData(MessageType.UnloadMedia)]
             public void CallReturnEmptyResponseOnIResponseService([Frozen] IResponseService responseService,
                 IMediaPlayer mediaPlayer, Stream outStream, BaseRequest message, RequestService sut)
             {

@@ -3,6 +3,7 @@ using Griffeye.VideoPlayerContract.Messages.Events;
 using Griffeye.VlcWrapper.Models;
 using LibVLCSharp.Shared;
 using System;
+using System.Threading.Tasks;
 
 namespace Griffeye.VlcWrapper.MediaPlayer
 {
@@ -10,6 +11,7 @@ namespace Griffeye.VlcWrapper.MediaPlayer
     {
         event EventHandler<EventArgs> EndReached;
         event EventHandler<long> TimeChanged;
+        event EventHandler<float> PositionChanged;
         event EventHandler<MediaPlayerLengthChangedEventArgs> LengthChanged;
         event EventHandler<VideoInfo> VideoInfoChanged;
         event EventHandler<EventArgs> Playing;
@@ -22,7 +24,7 @@ namespace Griffeye.VlcWrapper.MediaPlayer
         public void ConnectLocalFileStream(string pipeName);
         void Play();
         void Pause();
-        void LoadMedia(StreamType type, string file, float startPosition, float stopPosition);
+        Task LoadMedia(StreamType type, string file, float startPosition, float stopPosition);
         void Seek(float position);
         void SetPlaybackSpeed(float speed);
         void SetVolume(int volume);
@@ -35,6 +37,7 @@ namespace Griffeye.VlcWrapper.MediaPlayer
         void EnableImageOptions(bool enable);
         void EnableHardwareDecoding(bool enable);
         void AddMediaOption(string option);
-        void SetMediaTrack(VideoPlayerContract.Enums.TrackType trackType, int trackId);
+        Task SetMediaTrack(VideoPlayerContract.Enums.TrackType trackType, int trackId);
+        void UnloadMedia();
     }
 }

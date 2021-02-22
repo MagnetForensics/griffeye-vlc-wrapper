@@ -6,6 +6,7 @@ using Griffeye.VlcWrapper.MediaPlayer;
 using Griffeye.VlcWrapper.Messaging;
 using Griffeye.VlcWrapper.Messaging.Interfaces;
 using Griffeye.VlcWrapper.Models;
+using Griffeye.VlcWrapper.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -70,6 +71,7 @@ namespace Griffeye.VlcWrapper
                 .AddSingleton<IEventService, EventService>()
                 .AddSingleton<IStreamFactory, StreamFactory>()
                 .AddSingleton<IMessageSerializer, MessageSerializer>()
+                .AddTransient<IMediaTrackService, MediaTrackService>()
                 .BuildServiceProvider();
         }
 

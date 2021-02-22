@@ -46,8 +46,7 @@ namespace Griffeye.VlcWrapper.Tests.Tests
             }
             
             [Theory, MessageLoopData(true)]
-            public void ThrowInvalidOperationExceptionIfMessageIsNull([Frozen] IMessageService messageService,
-                [Frozen] BaseRequest message, MessageLoop sut)
+            public void ThrowInvalidOperationExceptionIfMessageIsNull(MessageLoop sut)
             {
                 sut.Invoking(x => x.Start())
                     .Should()
