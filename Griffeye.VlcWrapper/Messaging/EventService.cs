@@ -41,13 +41,13 @@ namespace Griffeye.VlcWrapper.Messaging
             messageSerializer.SerializeWithLengthPrefix(eventStream, new PausedEvent(), PrefixStyle.Base128);
             
             mediaPlayer.VolumeChanged += (s, a) =>
-            messageSerializer.SerializeWithLengthPrefix(eventStream, new VolumeChangedEvent(a.Volume), PrefixStyle.Base128);
+            messageSerializer.SerializeWithLengthPrefix(eventStream, new VolumeOrMuteChangedEvent(a.Volume, null), PrefixStyle.Base128);
             
             mediaPlayer.Muted += (s, a) =>
-            messageSerializer.SerializeWithLengthPrefix(eventStream, new MutedEvent(), PrefixStyle.Base128);
+            messageSerializer.SerializeWithLengthPrefix(eventStream, new VolumeOrMuteChangedEvent(null, true), PrefixStyle.Base128);
             
             mediaPlayer.Unmuted += (s, a) =>
-            messageSerializer.SerializeWithLengthPrefix(eventStream, new UnmutedEvent(), PrefixStyle.Base128);
+            messageSerializer.SerializeWithLengthPrefix(eventStream, new VolumeOrMuteChangedEvent(null, false), PrefixStyle.Base128);
 
             mediaPlayer.MediaTracksChanged += (s, a) =>
             messageSerializer.SerializeWithLengthPrefix(eventStream, new MediaTrackChangedEvent(a.MediaTracks), PrefixStyle.Base128);

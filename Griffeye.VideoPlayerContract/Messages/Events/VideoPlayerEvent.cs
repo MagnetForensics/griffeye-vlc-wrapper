@@ -10,9 +10,7 @@ namespace Griffeye.VideoPlayerContract.Messages.Events
     [ProtoInclude(500, typeof(EndOfFileEvent))]
     [ProtoInclude(600, typeof(PlayingEvent))]
     [ProtoInclude(700, typeof(PausedEvent))]
-    [ProtoInclude(800, typeof(VolumeChangedEvent))]
-    [ProtoInclude(900, typeof(MutedEvent))]
-    [ProtoInclude(1000, typeof(UnmutedEvent))]
+    [ProtoInclude(800, typeof(VolumeOrMuteChangedEvent))]
     [ProtoInclude(1100, typeof(PositionChangedEvent))]
     public abstract class VideoPlayerEvent
     {
