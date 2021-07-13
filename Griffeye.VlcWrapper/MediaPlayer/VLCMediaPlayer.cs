@@ -40,7 +40,7 @@ namespace Griffeye.VlcWrapper.MediaPlayer
         public event EventHandler<EventArgs> Muted;
         public event EventHandler<MediaTrackChangedEvent> MediaTracksChanged;
 
-        private readonly List<string> vlcArguments = new List<string>
+        private readonly List<string> vlcArguments = new()
         {
             "--no-video-title-show",
             "--no-stats",
@@ -59,19 +59,11 @@ namespace Griffeye.VlcWrapper.MediaPlayer
             this.logger = logger;
             this.mediaTrackService = mediaTrackService;
             Core.Initialize();
-            localFileStreamClient = new Client();       
-
-            if (inputData.AttachDebugger)
-            {
-                vlcArguments.Add("--verbose=2");
-            }
-            else
-            {
-                vlcArguments.Add("--verbose=0");
-            }
-
+            localFileStreamClient = new Client();
+            vlcArguments.Add(inputData.Serilog.MinimumLevel == "Debug" ? "--verbose=2" : "--verbose=0");
             library = new LibVLC(vlcArguments.ToArray());
             library.Log += Library_Log;
+            
             mediaPlayer = new LibVLCSharp.Shared.MediaPlayer(library)
             {
                 Hwnd = new IntPtr(inputData.Handle),
@@ -80,20 +72,19 @@ namespace Griffeye.VlcWrapper.MediaPlayer
                 EnableHardwareDecoding = true,
             };
             mediaPlayer.PositionChanged += HandlePositionChanged;
-            mediaPlayer.EndReached += (sender, args) => EndReached?.Invoke(this, args);
-            mediaPlayer.TimeChanged += (sender, args) =>
+            mediaPlayer.EndReached += (_, args) => EndReached?.Invoke(this, args);
+            mediaPlayer.TimeChanged += (_, args) =>
             {
                 time = args.Time;
                 TimeChanged?.Invoke(this, args.Time);
                 SendVideoInformation();
             };
-
-            mediaPlayer.LengthChanged += (sender, args) => { if (args.Length > 0) { LengthChanged?.Invoke(this, args); } };
-            mediaPlayer.Playing += (sender, args) => Playing?.Invoke(this, args);
-            mediaPlayer.Paused += (sender, args) => Paused?.Invoke(this, args);
-            mediaPlayer.VolumeChanged += (sender, args) => VolumeChanged?.Invoke(this, args);
-            mediaPlayer.Unmuted += (sender, args) => Unmuted?.Invoke(this, args);
-            mediaPlayer.Muted += (sender, args) => Muted?.Invoke(this, args);
+            mediaPlayer.LengthChanged += (_, args) => { if (args.Length > 0) { LengthChanged?.Invoke(this, args); } };
+            mediaPlayer.Playing += (_, args) => Playing?.Invoke(this, args);
+            mediaPlayer.Paused += (_, args) => Paused?.Invoke(this, args);
+            mediaPlayer.VolumeChanged += (_, args) => VolumeChanged?.Invoke(this, args);
+            mediaPlayer.Unmuted += (_, args) => Unmuted?.Invoke(this, args);
+            mediaPlayer.Muted += (_, args) => Muted?.Invoke(this, args);
         }
 
         private void SendVideoInformation()
@@ -135,12 +126,8 @@ namespace Griffeye.VlcWrapper.MediaPlayer
             PositionChanged?.Invoke(this, e.Position);
         }
 
-        private static bool IsFlipped(VideoOrientation orientation)
-        {
-            return orientation == VideoOrientation.RightTop ||
-                   orientation == VideoOrientation.LeftBottom ||
-                   orientation == VideoOrientation.RightBottom;
-        }
+        private static bool IsFlipped(VideoOrientation orientation) =>
+            orientation is VideoOrientation.RightTop or VideoOrientation.LeftBottom or VideoOrientation.RightBottom;
 
         private void Library_Log(object sender, LogEventArgs e) => logger.LogDebug("{Module} {Level} {Message}", e.Module, e.Level, e.Message);
 
@@ -159,7 +146,7 @@ namespace Griffeye.VlcWrapper.MediaPlayer
             if (mediaPlayer.State == VLCState.Ended)
             {
                 mediaPlayer.Stop();
-                PlayUntillBuffered();
+                PlayUntilBuffered();
                 Task.Run(async () => MediaTracksChanged?.Invoke(this, new MediaTrackChangedEvent(await mediaTrackService.GetTrackInformation(mediaPlayer))));
             }
 
@@ -193,22 +180,22 @@ namespace Griffeye.VlcWrapper.MediaPlayer
                 mediaPlayer.Media = media;
             }
 
-            await mediaPlayer.Media.Parse(MediaParseOptions.ParseLocal);
+            await mediaPlayer.Media.Parse();
             MediaTracksChanged?.Invoke(this, new MediaTrackChangedEvent(await mediaTrackService.GetTrackInformation(mediaPlayer)));
             mediaPlayer.Position = startPosition;
         }
 
-        private void PlayUntillBuffered()
+        private void PlayUntilBuffered()
         {
             using var manualResetEvent = new ManualResetEvent(false);
 
-            mediaPlayer.Buffering += mediaPlayerOnBuffering;
+            mediaPlayer.Buffering += MediaPlayerOnBuffering;
             mediaPlayer.Play();
             manualResetEvent.WaitOne(TimeSpan.FromSeconds(5));
-            mediaPlayer.Buffering -= mediaPlayerOnBuffering;
+            mediaPlayer.Buffering -= MediaPlayerOnBuffering;
             mediaPlayer.SetPause(true);
 
-            void mediaPlayerOnBuffering(object sender, MediaPlayerBufferingEventArgs args)
+            void MediaPlayerOnBuffering(object sender, MediaPlayerBufferingEventArgs args)
             {
                 if (args.Cache >= 100) { manualResetEvent.Set(); }
             }
@@ -261,7 +248,7 @@ namespace Griffeye.VlcWrapper.MediaPlayer
 
         public void EnableHardwareDecoding(bool enable) => mediaPlayer.EnableHardwareDecoding = enable;
 
-        public void AddMediaOption(string option) => mediaPlayer.Media.AddOption(option);
+        public void AddMediaOption(string option) => mediaPlayer.Media?.AddOption(option);
 
         public async Task SetMediaTrack(VideoPlayerContract.Enums.TrackType trackType, int trackId)
         {

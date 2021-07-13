@@ -6,6 +6,11 @@
         public string PipeInName { get; set; }
         public string PipeOutName { get; set; }
         public string PipeEventName { get; set; }
-        public bool AttachDebugger { get; set; }
+        public Serilog Serilog { get; set; }
+    }
+
+    public class Serilog
+    {
+        public string MinimumLevel { get; set; }
     }
 }

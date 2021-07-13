@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Threading.Tasks;
 using Griffeye.VlcWrapper.Factories;
 using Griffeye.VlcWrapper.MediaPlayer;
@@ -15,17 +14,14 @@ using Serilog;
 
 namespace Griffeye.VlcWrapper
 {
-    class Program
+    internal class Program
     {
         private static async Task<int> Main(string[] args)
         {            
             var config = SetupConfiguration(args);
             var serviceProvider = RegisterServices(config);
-            var input = serviceProvider.GetService<InputData>();
             
-            if (input.AttachDebugger) {Debugger.Launch(); }
-            
-           Log.Logger = new LoggerConfiguration()
+            Log.Logger = new LoggerConfiguration()
                 .ReadFrom.Configuration(config)
                 .CreateLogger();
 
@@ -52,7 +48,7 @@ namespace Griffeye.VlcWrapper
         private static IConfiguration SetupConfiguration(string[] args)
         {
             return new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json", optional: false)
+                .AddJsonFile("appsettings.json", false)
                 .AddCommandLine(args)
                 .Build();
         }
@@ -77,7 +73,6 @@ namespace Griffeye.VlcWrapper
 
         private static void DisposeServices(IServiceProvider serviceProvider)
         {
-            if (serviceProvider == null) { return; }
             if (serviceProvider is IDisposable disposable) { disposable.Dispose(); }
         }
     }

@@ -21,10 +21,10 @@ namespace Griffeye.VlcWrapper.Messaging
 
         public bool CanHandleMessage(IMediaPlayer mediaPlayer, BaseRequest message, Stream outStream)
         {
-            var result = ExecuteResultResponse(mediaPlayer, message, outStream) ||
-                   ExecuteEmptyResponse(mediaPlayer, message, outStream);
+            var result = ExecuteEmptyResponse(mediaPlayer, message, outStream) ||
+                         ExecuteResultResponse(mediaPlayer, message, outStream);
 
-            logger.LogDebug("Handled message of {Type} with {Sequence}", message.GetType(), message.SequenceNumber);
+            logger.LogDebug("[{Message}] handled with sequence number: [{Sequence}]", message.GetType().Name, message.SequenceNumber);
 
             return result;
         }

@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using Griffeye.VideoPlayerContract.Messages.Requests;
 using Griffeye.VideoPlayerContract.Messages.Responses;
 using Griffeye.VlcWrapper.Messaging.Interfaces;
@@ -23,16 +22,16 @@ namespace Griffeye.VlcWrapper.Messaging
         {
             var response = new BaseResponse(message.SequenceNumber);
 
-            logger.LogDebug("Returning empty response with {Sequence}", message.SequenceNumber);
+            logger.LogDebug("[empty] result returned with sequence number: [{Sequence}]", message.SequenceNumber);
             messageSerializer.SerializeWithLengthPrefix(outStream, response, PrefixStyle.Base128);
         }
 
         public void ReturnResultResponse(Stream outStream, BaseRequest message, bool success)
         {
             var response = new ResultResponse(message.SequenceNumber, success);
+            var result = success ? "Successful" : "Failure";
 
-            logger.LogDebug(
-                "Returning result response with {Sequence} and {Result}", message.SequenceNumber, success);
+            logger.LogDebug("[{Result}] result returned with sequence number: [{Sequence}]", result, message.SequenceNumber);
             messageSerializer.SerializeWithLengthPrefix(outStream, response, PrefixStyle.Base128);
         }
     }

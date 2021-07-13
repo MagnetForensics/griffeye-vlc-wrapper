@@ -34,10 +34,10 @@ namespace Griffeye.VlcWrapper.Messaging
                 }
                 if (requestService.CanHandleMessage(mediaPlayer, message, outStream)) { return false; }
 
-                logger.LogWarning($"Invalid message type: {message.GetType()}");
+                logger.LogWarning("[{Message}] is not a valid message type", message.GetType().Name);
                 responseService.ReturnResultResponse(outStream, message, false);
 
-                throw new InvalidCastException($"Invalid message type: {message.GetType()}");
+                throw new InvalidCastException($"{message.GetType().Name} is not a valid message type");
             }
             catch (InvalidCastException) { }
 

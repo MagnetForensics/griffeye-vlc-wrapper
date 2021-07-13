@@ -19,37 +19,37 @@ namespace Griffeye.VlcWrapper.Messaging
 
         public void Subscribe(Stream eventStream)
         {
-            mediaPlayer.EndReached += (sender, arguments) =>
+            mediaPlayer.EndReached += (_, _) =>
             messageSerializer.SerializeWithLengthPrefix(eventStream, new EndOfFileEvent(), PrefixStyle.Base128);
 
-            mediaPlayer.TimeChanged += (s, a) =>
+            mediaPlayer.TimeChanged += (_, a) =>
             messageSerializer.SerializeWithLengthPrefix(eventStream, new TimeUpdatedEvent(a / 1000f), PrefixStyle.Base128);
 
-            mediaPlayer.PositionChanged += (s, a) =>
+            mediaPlayer.PositionChanged += (_, a) =>
             messageSerializer.SerializeWithLengthPrefix(eventStream, new PositionChangedEvent(a), PrefixStyle.Base128);
 
-            mediaPlayer.LengthChanged += (s, a) => 
+            mediaPlayer.LengthChanged += (_, a) => 
             messageSerializer.SerializeWithLengthPrefix(eventStream, new DurationEvent(a.Length / 1000f), PrefixStyle.Base128);
             
-            mediaPlayer.VideoInfoChanged += (s, a) =>
+            mediaPlayer.VideoInfoChanged += (_, a) =>
             messageSerializer.SerializeWithLengthPrefix(eventStream, new MediaInfoEvent(a.AspectRatio, a.VideoOrientation), PrefixStyle.Base128);
             
-            mediaPlayer.Playing += (s, a) =>
+            mediaPlayer.Playing += (_, _) =>
             messageSerializer.SerializeWithLengthPrefix(eventStream, new PlayingEvent(), PrefixStyle.Base128);
             
-            mediaPlayer.Paused += (s, a) =>
+            mediaPlayer.Paused += (_, _) =>
             messageSerializer.SerializeWithLengthPrefix(eventStream, new PausedEvent(), PrefixStyle.Base128);
             
-            mediaPlayer.VolumeChanged += (s, a) =>
+            mediaPlayer.VolumeChanged += (_, a) =>
             messageSerializer.SerializeWithLengthPrefix(eventStream, new VolumeOrMuteChangedEvent(a.Volume, null), PrefixStyle.Base128);
             
-            mediaPlayer.Muted += (s, a) =>
+            mediaPlayer.Muted += (_, _) =>
             messageSerializer.SerializeWithLengthPrefix(eventStream, new VolumeOrMuteChangedEvent(null, true), PrefixStyle.Base128);
             
-            mediaPlayer.Unmuted += (s, a) =>
+            mediaPlayer.Unmuted += (_, _) =>
             messageSerializer.SerializeWithLengthPrefix(eventStream, new VolumeOrMuteChangedEvent(null, false), PrefixStyle.Base128);
 
-            mediaPlayer.MediaTracksChanged += (s, a) =>
+            mediaPlayer.MediaTracksChanged += (_, a) =>
             messageSerializer.SerializeWithLengthPrefix(eventStream, new MediaTrackChangedEvent(a.MediaTracks), PrefixStyle.Base128);
         }
     }

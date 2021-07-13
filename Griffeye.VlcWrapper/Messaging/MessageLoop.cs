@@ -22,7 +22,6 @@ namespace Griffeye.VlcWrapper.Messaging
         public MessageLoop(IMessageService messageService, ILogger<MessageLoop> logger,
             IStreamFactory streamFactory, IMessageSerializer messageSerializer, InputData inputData, IEventService eventService)
         {
-         
             this.messageService = messageService;
             this.logger = logger;
             this.streamFactory = streamFactory;
@@ -50,13 +49,13 @@ namespace Griffeye.VlcWrapper.Messaging
 
                     if (message == null)
                     {
-                        throw new InvalidOperationException($"No data in pipe.");
+                        throw new InvalidOperationException("No data in pipe.");
                     }
 
-                    logger.LogDebug("Got message with {Type} and {Sequence}", message.GetType(), message.SequenceNumber);
+                    logger.LogDebug("[{Message}] received with sequence number: [{Sequence}]", message.GetType().Name, message.SequenceNumber);
                     done = messageService.Process(message, pipeEventStream, pipeOutStream);
                 }
-                logger.LogInformation($"Handled message of Type Quit");
+                logger.LogInformation("[Quit] handled");
             }
             catch (EndOfStreamException) { logger.LogInformation("End of stream"); }
         }

@@ -12,7 +12,8 @@ namespace Griffeye.VlcWrapper.Tests.AutoData.Customization
                 Handle = fixture.Create<long>(),
                 PipeEventName = fixture.Create<string>(),
                 PipeInName = fixture.Create<string>(),
-                PipeOutName = fixture.Create<string>()
+                PipeOutName = fixture.Create<string>(),
+                Serilog = fixture.Create<Models.Serilog>()
             };
 
             fixture.Inject(inputData);
