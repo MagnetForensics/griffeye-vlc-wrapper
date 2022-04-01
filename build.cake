@@ -48,7 +48,7 @@ Task("Build")
 	DotNetCoreBuild(solution, new DotNetCoreBuildSettings
 	{
 		Configuration = configuration,
-		NoRestore = true
+		NoRestore = true,
 	});
 
 });
@@ -79,7 +79,6 @@ Task("Pack-Wrapper")
 		 Runtime = targetRuntime,
 		 SelfContained = true,
 		 MSBuildSettings = new DotNetCoreMSBuildSettings()
-
 	};
 	publishSettings.MSBuildSettings.Properties.Add("Platform", new [] {"x64"});
 	DotNetCorePublish(wrapperProject,publishSettings);
@@ -89,7 +88,6 @@ Task("Pack-Wrapper")
 		NoBuild = true,
 		OutputDirectory = artifactsDir,
 		MSBuildSettings = new DotNetCoreMSBuildSettings(),
-		
 	};
 	packSettings.MSBuildSettings.Properties.Add("NuspecFile", new [] {"Griffeye.VlcWrapper.nuspec"});
 	DotNetCorePack(wrapperProject, packSettings);

@@ -50,7 +50,7 @@ namespace Griffeye.VlcWrapper.Tests.Tests
             {
                 sut.Invoking(x => x.Start())
                     .Should()
-                    .Throw<InvalidOperationException>();
+                    .ThrowAsync<InvalidOperationException>();
             }
 
             [Theory, MessageLoopData]
