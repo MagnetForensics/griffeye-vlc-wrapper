@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 using Griffeye.VlcWrapper.Factories;
 using Griffeye.VlcWrapper.MediaPlayer;
@@ -17,8 +19,13 @@ namespace Griffeye.VlcWrapper
     internal class Program
     {
         private static async Task<int> Main(string[] args)
-        {            
+        {
             var config = SetupConfiguration(args);
+            if (config["WaitForDebugger"] == "true")
+            {
+                Debugger.Launch();
+            }
+
             var serviceProvider = RegisterServices(config);
             
             Log.Logger = new LoggerConfiguration()

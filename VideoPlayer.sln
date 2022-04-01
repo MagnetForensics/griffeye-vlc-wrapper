@@ -11,6 +11,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Griffeye.VlcWrapper.Tests", "Griffeye.VlcWrapper.Tests\Griffeye.VlcWrapper.Tests.csproj", "{97DEEE81-034A-4153-95EB-9221923A5AFB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Griffeye.VideoPlayerForms.Test", "Griffeye.VideoPlayerForms.Test\Griffeye.VideoPlayerForms.Test.csproj", "{0BAF156B-E3B6-4952-A681-EBA6C978DD9B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -29,6 +31,9 @@ Global
 		{97DEEE81-034A-4153-95EB-9221923A5AFB}.Debug|x64.Build.0 = Debug|x64
 		{97DEEE81-034A-4153-95EB-9221923A5AFB}.Release|x64.ActiveCfg = Release|Any CPU
 		{97DEEE81-034A-4153-95EB-9221923A5AFB}.Release|x64.Build.0 = Release|Any CPU
+		{0BAF156B-E3B6-4952-A681-EBA6C978DD9B}.Debug|x64.ActiveCfg = Debug|x64
+		{0BAF156B-E3B6-4952-A681-EBA6C978DD9B}.Debug|x64.Build.0 = Debug|x64
+		{0BAF156B-E3B6-4952-A681-EBA6C978DD9B}.Release|x64.ActiveCfg = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
