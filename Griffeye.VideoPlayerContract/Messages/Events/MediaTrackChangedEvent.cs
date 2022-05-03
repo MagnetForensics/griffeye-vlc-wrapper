@@ -1,19 +1,18 @@
 ﻿using Griffeye.VideoPlayerContract.Models;
-using ProtoBuf;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace Griffeye.VideoPlayerContract.Messages.Events
 {
-    [ProtoContract(ImplicitFields = ImplicitFields.AllPublic)]
-    public class MediaTrackChangedEvent : VideoPlayerEvent
+    [DataContract]
+    public class MediaTrackChangedEvent
     {
-        public List<TrackInformation> MediaTracks { get; set; }
+        [DataMember]
+        public List<TrackInformation> MediaTracks { get; }
 
         public MediaTrackChangedEvent(List<TrackInformation> mediaTracks)
         {
             MediaTracks = mediaTracks;
         }
-
-        public MediaTrackChangedEvent() { }
     }
 }

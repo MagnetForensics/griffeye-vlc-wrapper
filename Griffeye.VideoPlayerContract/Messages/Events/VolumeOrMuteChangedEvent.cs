@@ -1,19 +1,18 @@
-﻿using ProtoBuf;
+using System.Runtime.Serialization;
 
-namespace Griffeye.VideoPlayerContract.Messages.Events
+namespace Griffeye.VideoPlayerContract.Messages.Events;
+
+[DataContract]
+public class VolumeOrMuteChangedEvent
 {
-    [ProtoContract(ImplicitFields = ImplicitFields.AllPublic)]
-    public class VolumeOrMuteChangedEvent : VideoPlayerEvent
+    [DataMember]
+    public float? Volume { get; set; }
+    [DataMember]
+    public bool? Muted { get; set; }
+
+    public VolumeOrMuteChangedEvent(float? volume, bool? muted)
     {
-        public readonly float? Volume;
-        public readonly bool? Muted;
-
-        public VolumeOrMuteChangedEvent(float? volume, bool? muted)
-        {
-            Volume = volume;
-            Muted = muted;
-        }
-
-        public VolumeOrMuteChangedEvent() {}  // for protobuf
+        Volume = volume;
+        Muted = muted;
     }
 }

@@ -1,18 +1,31 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Threading;
 using System.Threading.Tasks;
-using Griffeye.VlcWrapper.Factories;
+using Griffeye.VideoPlayerContract.Logging;
+using Griffeye.VideoPlayerContract.Logging.Interfaces;
+using Griffeye.VideoPlayerContract.MediaPlayer;
+using Griffeye.VideoPlayerContract.MediaPlayer.Client;
+using Griffeye.VideoPlayerContract.MediaPlayer.Client.Interfaces;
+using Griffeye.VideoPlayerContract.MediaPlayer.Interfaces;
+using Griffeye.VideoPlayerContract.MediaPlayer.Server;
+using Griffeye.VideoPlayerContract.MediaPlayer.Server.Interfaces;
+using Griffeye.VideoPlayerContract.Stream;
+using Griffeye.VideoPlayerContract.Stream.Factories;
+using Griffeye.VideoPlayerContract.Stream.Factories.Interfaces;
+using Griffeye.VlcWrapper.Logging;
+using Griffeye.VlcWrapper.Logging.Factories;
 using Griffeye.VlcWrapper.MediaPlayer;
-using Griffeye.VlcWrapper.Messaging;
-using Griffeye.VlcWrapper.Messaging.Interfaces;
 using Griffeye.VlcWrapper.Models;
 using Griffeye.VlcWrapper.Services;
+using Griffeye.VlcWrapper.Stream;
+using Griffeye.VlcWrapper.Stream.Factories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Serilog;
+using Serilog.Events;
+using StreamJsonRpc;
 
 namespace Griffeye.VlcWrapper
 {
@@ -37,9 +50,9 @@ namespace Griffeye.VlcWrapper
 
             try
             {
-                var messageLoop = serviceProvider.GetService<IMessageLoop>();
-                await messageLoop.Start();
-
+                var rpcService = serviceProvider.GetService<IRpcServer>();
+                await rpcService?.StartAsync();
+                
                 return 0;
             }
             catch (Exception ex) { logger.LogError(ex, ex.Message); }
@@ -66,14 +79,12 @@ namespace Griffeye.VlcWrapper
                 .AddLogging(configure => configure.AddSerilog())
                 .Configure<InputData>(config)
                 .AddSingleton(r => r.GetRequiredService<IOptions<InputData>>().Value)
+                .AddSingleton<IFullDuplexStreamFactory, FullDuplexStreamFactory>()
                 .AddSingleton<IMediaPlayer, VLCMediaPlayer>()
-                .AddSingleton<IMessageLoop, MessageLoop>()
-                .AddSingleton<IMessageService, MessageService>()
-                .AddSingleton<IResponseService, ResponseService>()
-                .AddSingleton<IRequestService, RequestService>()
-                .AddSingleton<IEventService, EventService>()
+                .AddSingleton<IRpcLoggerFactory, RpcLoggerFactory>()
+                .AddSingleton<IRpcServer, RpcServer>()
+                .AddSingleton<IRpcMediaPlayer, JsonRpcMediaPlayer>()
                 .AddSingleton<IStreamFactory, StreamFactory>()
-                .AddSingleton<IMessageSerializer, MessageSerializer>()
                 .AddTransient<IMediaTrackService, MediaTrackService>()
                 .BuildServiceProvider();
         }

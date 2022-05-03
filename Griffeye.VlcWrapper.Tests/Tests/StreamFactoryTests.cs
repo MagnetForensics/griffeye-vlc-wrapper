@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.IO.Pipes;
 using FluentAssertions;
-using Griffeye.VlcWrapper.Factories;
+using Griffeye.VideoPlayerContract.Stream.Factories;
 using Griffeye.VlcWrapper.Tests.AutoData;
 using NUnit.Framework;
 

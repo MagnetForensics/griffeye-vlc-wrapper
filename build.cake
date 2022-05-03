@@ -33,9 +33,9 @@ Task("Clean")
 Task("Restore-NuGet-Packages")
 	.Does(() => 
 {
-	DotNetCoreRestore(new DotNetCoreRestoreSettings {
+	DotNetRestore(new DotNetRestoreSettings {
 		IgnoreFailedSources = true,
-		Verbosity = DotNetCoreVerbosity.Minimal,
+		Verbosity = DotNetVerbosity.Minimal,
 		Runtime = targetRuntime
 	});
 });
@@ -45,7 +45,7 @@ Task("Build")
 	.IsDependentOn("Restore-NuGet-Packages")
 	.Does(() =>
 {
-	DotNetCoreBuild(solution, new DotNetCoreBuildSettings
+	DotNetBuild(solution, new DotNetBuildSettings
 	{
 		Configuration = configuration,
 		NoRestore = true,
@@ -57,20 +57,20 @@ Task("Pack-Contract")
 	.IsDependentOn("Build")
 	.Does(() =>
 {
-	var packSettings = new DotNetCorePackSettings
+	var packSettings = new DotNetPackSettings
 	{
 		Configuration = configuration,
 		NoBuild = true,
 		OutputDirectory = artifactsDir
 	};
-	DotNetCorePack(contractProject, packSettings);
+	DotNetPack(contractProject, packSettings);
 });
 
 Task("Pack-Wrapper")
 	.IsDependentOn("Build")
 	.Does(() =>
 {
-	var publishSettings = new DotNetCorePublishSettings
+	var publishSettings = new DotNetPublishSettings
 	{
 		 NoRestore = true,
 		 OutputDirectory = publishDir,
@@ -78,19 +78,19 @@ Task("Pack-Wrapper")
 		 Framework = targetFramework,
 		 Runtime = targetRuntime,
 		 SelfContained = true,
-		 MSBuildSettings = new DotNetCoreMSBuildSettings()
+		 MSBuildSettings = new DotNetMSBuildSettings()
 	};
 	publishSettings.MSBuildSettings.Properties.Add("Platform", new [] {"x64"});
-	DotNetCorePublish(wrapperProject,publishSettings);
+	DotNetPublish(wrapperProject,publishSettings);
 
-	var packSettings = new DotNetCorePackSettings
+	var packSettings = new DotNetPackSettings
 	{
 		NoBuild = true,
 		OutputDirectory = artifactsDir,
-		MSBuildSettings = new DotNetCoreMSBuildSettings(),
+		MSBuildSettings = new DotNetMSBuildSettings(),
 	};
 	packSettings.MSBuildSettings.Properties.Add("NuspecFile", new [] {"Griffeye.VlcWrapper.nuspec"});
-	DotNetCorePack(wrapperProject, packSettings);
+	DotNetPack(wrapperProject, packSettings);
 
 });
 
@@ -101,12 +101,12 @@ Task("Run-Unit-Tests")
 	var projects = GetFiles("./**/*.Tests.csproj");
 	foreach(var project in projects)
 	{
-		DotNetCoreTest(
+		DotNetTest(
 			project.ToString(),
-			new DotNetCoreTestSettings()
+			new DotNetTestSettings()
 			{
 				Configuration = "Release",
-				Logger = "trx",
+				Loggers = new[]{"trx"},
 				ResultsDirectory = artifactsDir,
 				NoBuild = true
 			});

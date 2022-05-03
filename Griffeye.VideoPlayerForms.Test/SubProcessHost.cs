@@ -7,21 +7,18 @@ namespace Griffeye.VideoPlayerForms.Test
 {
     public sealed class SubProcessHost : IDisposable
     {
+        private readonly string sendPipe;
+        private readonly string readPipe;
         public event EventHandler<EventArgs>? Exited;
-        
-        public AnonymousPipeServerStream PipeSend { get; }
-        public AnonymousPipeServerStream PipeReceive { get; }
-        public AnonymousPipeServerStream PipeEvent { get; }
         public bool IsRunning => !hasDisposed && process is { HasExited: false };
         
         private readonly Process process;
         private bool hasDisposed;
 
-        public SubProcessHost()
+        public SubProcessHost(string sendPipe, string readPipe)
         {
-            PipeSend = new AnonymousPipeServerStream(PipeDirection.Out, HandleInheritability.Inheritable);
-            PipeReceive = new AnonymousPipeServerStream(PipeDirection.In, HandleInheritability.Inheritable);
-            PipeEvent = new AnonymousPipeServerStream(PipeDirection.In, HandleInheritability.Inheritable);
+            this.sendPipe = sendPipe;
+            this.readPipe = readPipe;
             process = new Process { EnableRaisingEvents = true };
             process.Exited += (_, _) => Exited?.Invoke(this, EventArgs.Empty);
         }
@@ -44,9 +41,8 @@ namespace Griffeye.VideoPlayerForms.Test
             
             process.StartInfo.Arguments =
                 $"Handle={windowHandle} " +
-                $"PipeInName={PipeSend.GetClientHandleAsString()} " +
-                $"PipeOutName={PipeReceive.GetClientHandleAsString()} " +
-                $"PipeEventName={PipeEvent.GetClientHandleAsString()} " +
+                $"PipeInName={readPipe} " +
+                $"PipeOutName={sendPipe} " +
                 $"Serilog:MinimumLevel={logLevel} " +
                 $"Serilog:WriteTo:0:Args:configure:0:Args:path=\"{logPath}\" " +
                 $"WaitForDebugger={waitForDebugger}";
@@ -79,9 +75,6 @@ namespace Griffeye.VideoPlayerForms.Test
         public void Dispose()
         {
             hasDisposed = true;
-            PipeSend.Dispose();
-            PipeReceive.Dispose();
-            PipeEvent.Dispose();
 
             try
             {

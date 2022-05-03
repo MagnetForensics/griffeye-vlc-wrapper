@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using LibVLCSharp.Shared;
 
 namespace Griffeye.VlcWrapper.Services
 {
@@ -26,10 +27,19 @@ namespace Griffeye.VlcWrapper.Services
             }
         }
 
-        public async Task<List<TrackInformation>> GetTrackInformation(LibVLCSharp.Shared.MediaPlayer mediaPlayer)
+        public async Task<List<TrackInformation>> GetTrackInformationAsync(LibVLCSharp.Shared.MediaPlayer mediaPlayer)
         {
-            var list = new List<TrackInformation>();            
-            await mediaPlayer.Media.Parse(LibVLCSharp.Shared.MediaParseOptions.ParseLocal);
+            var list = new List<TrackInformation>();
+
+            if (mediaPlayer.Media == null)
+            {
+                throw new NullReferenceException();
+            }
+
+            if (!mediaPlayer.Media.IsParsed)
+            {
+                await mediaPlayer.Media.Parse();
+            }
 
             foreach (var track in mediaPlayer.Media.Tracks)
             {
@@ -41,7 +51,7 @@ namespace Griffeye.VlcWrapper.Services
                     TrackType = GetTrackType(track.TrackType),
                     Description = GetTrackDescription(mediaPlayer, track.TrackType, track.Id),
                     Codec = mediaPlayer.Media.CodecDescription(track.TrackType, track.Codec),
-                    Bitrate = track.TrackType == LibVLCSharp.Shared.TrackType.Audio ? track.Data.Audio.Rate : track.Data.Video.FrameRateNum,
+                    Bitrate = track.TrackType == TrackType.Audio ? track.Data.Audio.Rate : track.Data.Video.FrameRateNum,
                     IsActive = IsActiveTrack(mediaPlayer, track.TrackType, track.Id)
                 };
 
@@ -51,14 +61,14 @@ namespace Griffeye.VlcWrapper.Services
             return list;
         }
 
-        private string GetTrackDescription(LibVLCSharp.Shared.MediaPlayer mediaPlayer, LibVLCSharp.Shared.TrackType trackType, int trackId)
+        private static string GetTrackDescription(LibVLCSharp.Shared.MediaPlayer mediaPlayer, TrackType trackType, int trackId)
         {
             try
             {
                 return trackType switch
                 {
-                    LibVLCSharp.Shared.TrackType.Audio => mediaPlayer.AudioTrackDescription.FirstOrDefault(x => x.Id == trackId).Name,
-                    LibVLCSharp.Shared.TrackType.Video => mediaPlayer.VideoTrackDescription.FirstOrDefault(x => x.Id == trackId).Name,
+                    TrackType.Audio => mediaPlayer.AudioTrackDescription.FirstOrDefault(x => x.Id == trackId).Name,
+                    TrackType.Video => mediaPlayer.VideoTrackDescription.FirstOrDefault(x => x.Id == trackId).Name,
                     _ => string.Empty
                 };
             }
@@ -68,31 +78,31 @@ namespace Griffeye.VlcWrapper.Services
             }
         }
 
-        private bool IsSupportedTrackType(LibVLCSharp.Shared.TrackType trackType)
+        private static bool IsSupportedTrackType(TrackType trackType)
         {
             return trackType switch
             {
-                LibVLCSharp.Shared.TrackType.Audio or LibVLCSharp.Shared.TrackType.Video => true,
+                TrackType.Audio or TrackType.Video => true,
                 _ => false
             };
         }
 
-        private VideoPlayerContract.Enums.TrackType GetTrackType(LibVLCSharp.Shared.TrackType trackType)
+        private VideoPlayerContract.Enums.TrackType GetTrackType(TrackType trackType)
         {
             return trackType switch
             {
-                LibVLCSharp.Shared.TrackType.Audio => VideoPlayerContract.Enums.TrackType.Audio,
-                LibVLCSharp.Shared.TrackType.Video => VideoPlayerContract.Enums.TrackType.Video,
-                _ => throw new ArgumentOutOfRangeException()
+                TrackType.Audio => VideoPlayerContract.Enums.TrackType.Audio,
+                TrackType.Video => VideoPlayerContract.Enums.TrackType.Video,
+                _ => throw new ArgumentOutOfRangeException($"Unsupported track type")
             };
         }
 
-        private bool IsActiveTrack(LibVLCSharp.Shared.MediaPlayer mediaPlayer, LibVLCSharp.Shared.TrackType type, int trackId)
+        private static bool IsActiveTrack(LibVLCSharp.Shared.MediaPlayer mediaPlayer, TrackType type, int trackId)
         {
             switch (type)
             {
-                case LibVLCSharp.Shared.TrackType.Audio when trackId == mediaPlayer.AudioTrack:
-                case LibVLCSharp.Shared.TrackType.Video when trackId == mediaPlayer.VideoTrack:
+                case TrackType.Audio when trackId == mediaPlayer.AudioTrack:
+                case TrackType.Video when trackId == mediaPlayer.VideoTrack:
                     return true;
                 default:
                     return false;

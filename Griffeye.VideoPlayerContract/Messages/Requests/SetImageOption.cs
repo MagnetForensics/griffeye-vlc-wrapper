@@ -1,27 +1,29 @@
 ﻿using Griffeye.VideoPlayerContract.Enums;
-using ProtoBuf;
 using System;
+using System.Runtime.Serialization;
 
 namespace Griffeye.VideoPlayerContract.Messages.Requests
 {
-    [ProtoContract(ImplicitFields = ImplicitFields.AllPublic)]
-    public class SetImageOption : BaseRequest
+    [DataContract]
+    public class SetImageOption
     {
-        public ImageOption Option { get; private set; }
+        [DataMember]
+        public ImageOption Option { get; }
 
-        public float Value { get; private set; }
+        [DataMember]
+        public float Value { get; }
 
         public SetImageOption(ImageOption option, float value)
         {
             switch (option)
             {
-                case ImageOption.Contrast when value < 0 || value > 2:
+                case ImageOption.Contrast when value is < 0 or > 2:
                     throw new ArgumentOutOfRangeException(nameof(value), "Must be between [0.0 ... 2.0] for contrast.");
-                case ImageOption.Brightness when value < 0 || value > 2:
+                case ImageOption.Brightness when value is < 0 or > 2:
                     throw new ArgumentOutOfRangeException(nameof(value), "Must be between [0.0 ... 2.0] for brightness.");
-                case ImageOption.Hue when value < -180 || value > 180:
+                case ImageOption.Hue when value is < -180 or > 180:
                     throw new ArgumentOutOfRangeException(nameof(value), "Must be between [-180 ... 180] for hue.");
-                case ImageOption.Saturation when value < 0 || value > 3:
+                case ImageOption.Saturation when value is < 0 or > 3:
                     throw new ArgumentOutOfRangeException(nameof(value), "Must be between [0.0 ... 3.0] for saturation.");
                 case ImageOption.Gamma when value < 0.01 || value > 10:
                     throw new ArgumentOutOfRangeException(nameof(value), "Must be between [0.01 ... 10.0] for gamma.");
@@ -32,7 +34,5 @@ namespace Griffeye.VideoPlayerContract.Messages.Requests
             Option = option;
             Value = value;
         }
-
-        private SetImageOption() { }
     }
 }

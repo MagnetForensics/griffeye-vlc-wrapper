@@ -1,30 +1,38 @@
+using System.IO.Pipes;
 using Griffeye.VideoPlayerContract.Enums;
+using Griffeye.VideoPlayerContract.MediaPlayer.Client;
+using Griffeye.VideoPlayerContract.MediaPlayer.Client.Factories;
+using Griffeye.VideoPlayerContract.MediaPlayer.Client.Interfaces;
 using Griffeye.VideoPlayerContract.Messages.Events;
-using ProtoBuf;
-using Griffeye.VideoPlayerContract.Messages.Requests;
-using Griffeye.VideoPlayerContract.Messages.Responses;
 
 namespace Griffeye.VideoPlayerForms.Test;
 
 public class VideoPlayer : IDisposable
 {
-    public event EventHandler<EventArgs>? Playing;
-    public event EventHandler<EventArgs>? Paused;
-    public event EventHandler<EventArgs>? Exited;
+    public event EventHandler<float>? TimeChanged;
+    public event EventHandler<float>? LengthChanged;
+    public event EventHandler? Playing;
+    public event EventHandler? Paused;
+    public event EventHandler? EndReached;
+    public event EventHandler? Exited;
+    public event EventHandler<MediaTrackChangedEvent>? MediaTrackChanged;
 
     public bool IsRunning => subProcess.IsRunning;
+    public Task<bool> IsPlaying => mediaPlayer.IsPlayingAsync();
     
-    private readonly TimeSpan defaultTimeout = TimeSpan.FromSeconds(4);
     private readonly CancellationTokenSource cancellationTokenSource;
     private readonly IntPtr videoHandle;
 
-    private int currSecNum;
+    private readonly SubProcessHost subProcess;
+    private readonly IRpcMediaPlayer mediaPlayer;
     private CancellationToken CancellationToken => cancellationTokenSource.Token;
-    private SubProcessHost subProcess;
     
     public VideoPlayer(IntPtr videoHandle)
     {
-        subProcess = new SubProcessHost();
+        var inPipe = new AnonymousPipeServerStream(PipeDirection.In, HandleInheritability.Inheritable);
+        var outPipe = new AnonymousPipeServerStream(PipeDirection.Out, HandleInheritability.Inheritable);
+        
+        subProcess = new SubProcessHost(inPipe.GetClientHandleAsString(), outPipe.GetClientHandleAsString());
         this.videoHandle = videoHandle;
         cancellationTokenSource = new CancellationTokenSource();
         subProcess.Exited += (_, _) =>
@@ -32,6 +40,13 @@ public class VideoPlayer : IDisposable
             Dispose();
             Exited?.Invoke(this, EventArgs.Empty);
         };
+        mediaPlayer = new JsonRpcMediaPlayerFactory(outPipe, inPipe).Create();
+        mediaPlayer.Playing += (_,args) => Playing?.Invoke(this, args);
+        mediaPlayer.Paused += (_,args) => Paused?.Invoke(this, args);
+        mediaPlayer.EndReached += (_,args) => EndReached?.Invoke(this, args);
+        mediaPlayer.TimeChanged += (_, time) => TimeChanged?.Invoke(this, time);
+        mediaPlayer.LengthChanged += (_, time) => LengthChanged?.Invoke(this, time);
+        mediaPlayer.MediaTracksChanged += (_, args) => MediaTrackChanged?.Invoke(this, args);
     }
 
     public void Dispose()
@@ -39,127 +54,52 @@ public class VideoPlayer : IDisposable
         GC.SuppressFinalize(this);
         subProcess.Dispose();
         cancellationTokenSource.Cancel();
+        mediaPlayer?.Dispose();
     }
 
-    public async Task Init()
+    public async Task InitAsync()
     {
-        try
-        {
-            await StartSubProcess(videoHandle);
-            SubProcessEventProcessorAsync(CancellationToken).ForgetButLogExceptions();
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e.Message);
-        }
+        await StartSubProcessAsync(videoHandle);
     }
 
-    public async Task LoadFile(string filePath)
+    public async Task LoadFileAsync(string filePath)
     {
-        await SendToSubProcess<BaseResponse>(new Load(StreamType.File, filePath, 0, 1F));
+        await mediaPlayer.LoadMediaAsync(StreamType.File, filePath, 0, 1F);
     }
 
-    public async Task Play()
+    public async Task PlayAsync()
     {
-        await SendToSubProcess<BaseResponse>(new Play());
+        await mediaPlayer.PlayAsync();
     }
 
-    public async Task Pause()
+    public async Task PauseAsync()
     {
-        await SendToSubProcess<BaseResponse>(new Pause());
+        await mediaPlayer.PauseAsync();
     }
 
-    private Task StartSubProcess(IntPtr handle)
+    public async Task SkipToStartAsync()
     {
-        subProcess = new SubProcessHost();
+        await mediaPlayer.SeekAsync(0);
+    }
+    
+    public async Task SkipToEndAsync()
+    {
+        await mediaPlayer.SeekAsync(1F);
+    }
+    
+    public async Task StepForwardAsync()
+    {
+        await mediaPlayer.StepForwardAsync();
+    }
+    
+    public async Task StepBackAsync()
+    {
+        await mediaPlayer.StepBackAsync();
+    }
+
+    private Task StartSubProcessAsync(IntPtr handle)
+    {
         subProcess.Exited += (_, _) => Exited?.Invoke(this, EventArgs.Empty);
         return Task.Run(() => { subProcess.Start(handle); }, CancellationToken);
-    }
-
-    private async Task SubProcessEventProcessorAsync(CancellationToken cancellationToken)
-    {
-        try
-        {
-            while (subProcess.PipeEvent.IsConnected && !cancellationToken.IsCancellationRequested)
-            {
-                // Wait until there is data in the stream before attempting to deserialize
-                await subProcess.PipeEvent
-                    .ReadAsync(Array.Empty<byte>().AsMemory(0, 0), cancellationToken)
-                    .ConfigureAwait(false);
-
-                var message = await Task.Run(() => Serializer
-                        .DeserializeWithLengthPrefix<VideoPlayerEvent>(subProcess.PipeEvent, PrefixStyle.Base128),
-                    cancellationToken).ConfigureAwait(false);
-
-                if (message is not null)
-                {
-                    HandleMessages(message);
-                }
-            }
-        }
-        catch (ObjectDisposedException)
-        {
-            throw new Exception();
-        }
-        catch (Exception ex)
-        {
-            throw new Exception(ex.Message);
-        }
-    }
-
-    private void HandleMessages(VideoPlayerEvent message)
-    {
-        switch (message)
-        {
-            // Handle incoming messages
-            case PlayingEvent _: Playing?.Invoke(this, EventArgs.Empty); break;
-            case PausedEvent _: Paused?.Invoke(this, EventArgs.Empty); break;
-        }
-    }
-
-    private async Task<TReturnType> SendToSubProcess<TReturnType>(BaseRequest message)
-        where TReturnType : BaseResponse
-    {
-        using var cts = new CancellationTokenSource();
-        var messageTask = Task.Run(() =>
-        {
-            SendMessage(message);
-            var response = Serializer.DeserializeWithLengthPrefix<TReturnType>(subProcess.PipeReceive, PrefixStyle.Base128);
-
-            if (response?.SequenceNumber != message.SequenceNumber)
-            {
-                throw new Exception("Mismatching sequence number");
-            }
-
-            return response;
-        }, cts.Token);
-
-        var completedTask = await Task.WhenAny(messageTask, Task.Delay(defaultTimeout, cts.Token)).ConfigureAwait(false);
-
-        cts.Cancel();
-        
-        if (completedTask != messageTask)
-        {
-            throw new Exception($"Timeout when sending '{message.GetType().Name}' to video sub process.");
-        }
-
-        return await messageTask.ConfigureAwait(false);
-    }
-
-    private void SendMessage(BaseRequest message)
-    {
-        if (subProcess == null)
-        {
-            throw new Exception(
-                "Communication pipe not set up. SubProcess might not be started or the Presenter might be disposed.");
-        }
-
-        if (!subProcess.IsRunning)
-        {
-            throw new Exception("The sub process is not running.");
-        }
-
-        message.SequenceNumber = Interlocked.Increment(ref currSecNum);
-        Serializer.SerializeWithLengthPrefix(subProcess.PipeSend, message, PrefixStyle.Base128);
     }
 }

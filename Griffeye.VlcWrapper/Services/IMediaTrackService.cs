@@ -7,6 +7,6 @@ namespace Griffeye.VlcWrapper.Services
     public interface IMediaTrackService
     {
         void SetMediaTrack(LibVLCSharp.Shared.MediaPlayer mediaPlayer, VideoPlayerContract.Enums.TrackType trackType, int trackId);
-        Task<List<TrackInformation>> GetTrackInformation(LibVLCSharp.Shared.MediaPlayer mediaPlayer);
+        Task<List<TrackInformation>> GetTrackInformationAsync(LibVLCSharp.Shared.MediaPlayer mediaPlayer);
     }
 }
