@@ -64,7 +64,7 @@ public class VideoPlayer : IDisposable
 
     public async Task LoadFileAsync(string filePath)
     {
-        await mediaPlayer.LoadMediaAsync(StreamType.File, filePath, 0, 1F);
+        await mediaPlayer.LoadMediaAsync(filePath, 0, 1F);
     }
 
     public async Task PlayAsync()

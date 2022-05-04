@@ -75,9 +75,14 @@ public class JsonRpcMediaPlayer : IRpcMediaPlayer
         await Task.Run(() => mediaPlayer.Pause());
     }
 
-    public async Task LoadMediaAsync(StreamType type, string file, float startPosition, float stopPosition)
+    public async Task LoadMediaAsync(string file, float startPosition, float stopPosition)
     {
-        await mediaPlayer.LoadMediaAsync(type, file, startPosition, stopPosition);
+        await mediaPlayer.LoadMediaAsync(file, startPosition, stopPosition);
+    }
+
+    public void LoadMediaStream(string file, float startPosition, float stopPosition)
+    {
+        mediaPlayer.LoadMediaStream(file, startPosition, stopPosition);
     }
 
     public async Task SeekAsync(float position)

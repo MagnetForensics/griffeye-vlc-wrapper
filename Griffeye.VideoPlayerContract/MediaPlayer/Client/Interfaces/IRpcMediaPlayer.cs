@@ -24,7 +24,8 @@ namespace Griffeye.VideoPlayerContract.MediaPlayer.Client.Interfaces
         Task PlayAsync();
         Task<bool> IsPlayingAsync();
         Task PauseAsync();
-        Task LoadMediaAsync(StreamType type, string file, float startPosition, float stopPosition);
+        Task LoadMediaAsync(string file, float startPosition, float stopPosition);
+        void LoadMediaStream(string file, float startPosition, float stopPosition);
         Task SeekAsync(float position);
         Task SetPlaybackSpeedAsync(float speed);
         Task SetVolumeAsync(int volume);

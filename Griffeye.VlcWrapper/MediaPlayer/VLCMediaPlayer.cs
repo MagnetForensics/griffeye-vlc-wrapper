@@ -28,7 +28,6 @@ namespace Griffeye.VlcWrapper.MediaPlayer
         private float startPosition;
         private float stopPosition;
         private long time;
-        private bool eventsEnabled;
 
         public event EventHandler<EventArgs> EndReached;
         public event EventHandler<float> TimeChanged;
@@ -75,19 +74,19 @@ namespace Griffeye.VlcWrapper.MediaPlayer
             };
             
             mediaPlayer.PositionChanged += HandlePositionChanged;
-            mediaPlayer.EndReached += (_, args) => TryInvokeEvent(() => EndReached?.Invoke(this, args));
+            mediaPlayer.EndReached += (_, args) => EndReached?.Invoke(this, args);
             mediaPlayer.TimeChanged += (_, args) =>
             {
                 time = args.Time;
-                TryInvokeEvent(() => TimeChanged?.Invoke(this, args.Time));
+               TimeChanged?.Invoke(this, args.Time);
                 SendVideoInformation();
             };
-            mediaPlayer.LengthChanged += (_, args) => { if (args.Length > 0) { TryInvokeEvent(() => LengthChanged?.Invoke(this, args.Length)); } };
-            mediaPlayer.Playing += (_, args) => TryInvokeEvent(() => Playing?.Invoke(this, args));
-            mediaPlayer.Paused += (_, args) => TryInvokeEvent(() => Paused?.Invoke(this, args));
-            mediaPlayer.VolumeChanged += (_, args) => TryInvokeEvent(() => VolumeChanged?.Invoke(this, new VolumeOrMuteChangedEvent(args.Volume, null)));
-            mediaPlayer.Unmuted += (_, args) => TryInvokeEvent(() => UnMuted?.Invoke(this, args));
-            mediaPlayer.Muted += (_, args) => TryInvokeEvent(() => Muted?.Invoke(this, args));
+            mediaPlayer.LengthChanged += (_, args) => { if (args.Length > 0) {LengthChanged?.Invoke(this, args.Length); } };
+            mediaPlayer.Playing += (_, args) => Playing?.Invoke(this, args);
+            mediaPlayer.Paused += (_, args) => Paused?.Invoke(this, args);
+            mediaPlayer.VolumeChanged += (_, args) => VolumeChanged?.Invoke(this, new VolumeOrMuteChangedEvent(args.Volume, null));
+            mediaPlayer.Unmuted += (_, args) => UnMuted?.Invoke(this, args);
+            mediaPlayer.Muted += (_, args) => Muted?.Invoke(this, args);
         }
 
         private void SendVideoInformation()
@@ -124,14 +123,14 @@ namespace Griffeye.VlcWrapper.MediaPlayer
                 aspectRatio *= (float)videoTrack.Data.Video.SarNum / videoTrack.Data.Video.SarDen;
             }
 
-            TryInvokeEvent(() => VideoInfoChanged?.Invoke(this, new VideoInfoEvent { VideoOrientation = orientation.ToString(), AspectRatio = aspectRatio }));
+            VideoInfoChanged?.Invoke(this, new VideoInfoEvent { VideoOrientation = orientation.ToString(), AspectRatio = aspectRatio });
         }
 
         private void HandlePositionChanged(object sender, MediaPlayerPositionChangedEventArgs e)
         {
             if (e.Position >= stopPosition) { Task.Run(() => mediaPlayer.SetPause(true)); }
 
-            TryInvokeEvent(() => PositionChanged?.Invoke(this, e.Position));
+            PositionChanged?.Invoke(this, e.Position);
         }
 
         private static bool IsFlipped(VideoOrientation orientation) =>
@@ -147,10 +146,7 @@ namespace Griffeye.VlcWrapper.MediaPlayer
 
         public bool IsPlaying() => mediaPlayer.IsPlaying;
 
-        public void Pause()
-        {
-            mediaPlayer.SetPause(true);
-        }
+        public void Pause() => mediaPlayer.SetPause(true);
 
         public void Seek(float position)
         {
@@ -160,23 +156,15 @@ namespace Griffeye.VlcWrapper.MediaPlayer
             {
                 mediaPlayer.Stop();
                 PlayUntilBuffered();
-                Task.Run(() =>
-                {
-                    async void Action() => MediaTracksChanged?.Invoke(this, new MediaTrackChangedEvent(
-                        await mediaTrackService.GetTrackInformationAsync(mediaPlayer)));
-                    TryInvokeEvent(Action);
-                    return Task.CompletedTask;
-                });
             }
 
             mediaPlayer.Position = allowedPosition;
             time = mediaPlayer.Time;
-            TryInvokeEvent(() => TimeChanged?.Invoke(this, time));
+            TimeChanged?.Invoke(this, time);
         }
 
-        public async Task LoadMediaAsync(StreamType type, string file, float startPosition, float stopPosition)
+        public async Task LoadMediaAsync(string file, float startPosition, float stopPosition)
         {
-            eventsEnabled = false;
             this.startPosition = startPosition;
             this.stopPosition = stopPosition;
             aspectRationSet = false;
@@ -184,44 +172,44 @@ namespace Griffeye.VlcWrapper.MediaPlayer
             // Vlc crashes if image options are enabled when changing video.            
             EnableImageOptions(false);
             
-            if (type == StreamType.LocalFileStream)
-            {
-                streamMediaInput?.Dispose();
-                currentStream?.Dispose();
-                currentStream = localFileStreamClient.OpenStream(file);
-                streamMediaInput = new StreamMediaInput(currentStream);
-
-                using var media = new Media(library, streamMediaInput);
-                mediaPlayer.Media = media;
-                mediaPlayer.Play();
-            }
-            else
-            {
-                using var media = new Media(library, file);
-                mediaPlayer.Media = media;
-                
-                if (!mediaPlayer.Media.IsParsed)
-                {
-                    await mediaPlayer.Media.Parse();
-                }
-            }
-
+            using var media = new Media(library, file);
+            
+            mediaPlayer.Media = media;
             mediaPlayer.Position = startPosition;
+            await mediaPlayer.Media.Parse();
+            
             var trackInfo = await mediaTrackService.GetTrackInformationAsync(mediaPlayer);
-            
-            if (type == StreamType.LocalFileStream)
-            {
-                // When finished reset the position
-                mediaPlayer.SetPause(true);
-                Seek(startPosition);
-            }
-
-            eventsEnabled = true;
-            
-            // Make sure to update the time and length
-            TimeChanged?.Invoke(this, mediaPlayer.Time);
-            LengthChanged?.Invoke(this, mediaPlayer.Length);
             MediaTracksChanged?.Invoke(this, new MediaTrackChangedEvent(trackInfo));
+        }
+        
+        public void LoadMediaStream(string file, float startPosition, float stopPosition)
+        {
+            this.startPosition = startPosition;
+            this.stopPosition = stopPosition;
+            aspectRationSet = false;
+
+            // Vlc crashes if image options are enabled when changing video.            
+            EnableImageOptions(false);
+            
+            streamMediaInput?.Dispose();
+            currentStream?.Dispose();
+            currentStream = localFileStreamClient.OpenStream(file);
+            streamMediaInput = new StreamMediaInput(currentStream);
+
+            using var media = new Media(library, streamMediaInput);
+            mediaPlayer.Media = media;
+            mediaPlayer.Media.ParsedChanged += OnMediaParsedChanged;
+        }
+
+        private void OnMediaParsedChanged(object _, MediaParsedChangedEventArgs args)
+        {
+            if (args.ParsedStatus != MediaParsedStatus.Done) return;
+
+            Task.Run(async () =>
+            {
+                var trackInfo = await mediaTrackService.GetTrackInformationAsync(mediaPlayer);
+                MediaTracksChanged?.Invoke(this, new MediaTrackChangedEvent(trackInfo));
+            });
         }
 
         private void PlayUntilBuffered()
@@ -271,7 +259,7 @@ namespace Griffeye.VlcWrapper.MediaPlayer
         {
             mediaPlayer.NextFrame();
             time += (long)(1000 / mediaPlayer.Fps);
-            TryInvokeEvent(() => TimeChanged?.Invoke(this, time));
+            TimeChanged?.Invoke(this, time);
         }
 
         public void StepBack()
@@ -291,14 +279,11 @@ namespace Griffeye.VlcWrapper.MediaPlayer
 
         public async Task SetMediaTrackAsync(VideoPlayerContract.Enums.TrackType trackType, int trackId)
         {
-            if (mediaPlayer.State == VLCState.Ended)
-            {
-                return;
-            }
+            if (mediaPlayer.State == VLCState.Ended) return;
 
             mediaTrackService.SetMediaTrack(mediaPlayer, trackType, trackId);
             var trackInfo = await mediaTrackService.GetTrackInformationAsync(mediaPlayer);
-            TryInvokeEvent(() => MediaTracksChanged?.Invoke(this, new MediaTrackChangedEvent(trackInfo)));
+            MediaTracksChanged?.Invoke(this, new MediaTrackChangedEvent(trackInfo));
         }
 
         public void UnloadMedia() => mediaPlayer.Media?.Dispose();
@@ -310,16 +295,6 @@ namespace Griffeye.VlcWrapper.MediaPlayer
             mediaPlayer.Dispose();
             library.Dispose();
             localFileStreamClient.Dispose();
-        }
-
-        private void TryInvokeEvent(Action action)
-        {
-            if (!eventsEnabled)
-            {
-                return;
-            }
-
-            action();
         }
     }
 }

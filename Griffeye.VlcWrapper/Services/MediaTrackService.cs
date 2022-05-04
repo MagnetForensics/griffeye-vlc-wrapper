@@ -2,13 +2,22 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using LibVLCSharp.Shared;
+using Microsoft.Extensions.Logging;
 
 namespace Griffeye.VlcWrapper.Services
 {
     public class MediaTrackService : IMediaTrackService
     {
+        private readonly ILogger logger;
+
+        public MediaTrackService(ILogger<MediaTrackService> logger)
+        {
+            this.logger = logger;
+        }
+        
         public void SetMediaTrack(LibVLCSharp.Shared.MediaPlayer mediaPlayer, VideoPlayerContract.Enums.TrackType trackType, int trackId)
         {
             switch (trackType)
