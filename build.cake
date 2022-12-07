@@ -12,7 +12,7 @@ var configuration = Argument("configuration", "Release");
 var artifactsDir = Directory("./artifacts");
 var publishDir = artifactsDir + Directory("publish");
 var targetRuntime = "win-x64";
-var targetFramework = "net6.0-windows";
+var targetFramework = "net7.0-windows";
 
 var solution = "./VideoPlayer.sln";
 var contractProject = "./Griffeye.VideoPlayerContract/Griffeye.VideoPlayerContract.csproj";
@@ -72,7 +72,7 @@ Task("Pack-Wrapper")
 {
 	var publishSettings = new DotNetPublishSettings
 	{
-		 NoRestore = true,
+		 NoRestore = false,
 		 OutputDirectory = publishDir,
 		 Configuration = configuration,
 		 Framework = targetFramework,

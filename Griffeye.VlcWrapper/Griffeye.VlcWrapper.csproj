@@ -5,6 +5,7 @@
     <Platforms>x64</Platforms>
     <SelfContained Condition="'$(Configuration)' == 'Release'">true</SelfContained>
     <PublishTrimmed Condition="'$(Configuration)' == 'Release'">true</PublishTrimmed>
+    <TrimMode Condition="'$(Configuration)' == 'Release'">partial</TrimMode>
     <PublishReadyToRun Condition="'$(Configuration)' == 'Release'">true</PublishReadyToRun>
     <PublishSingleFile Condition="'$(Configuration)' == 'Release'">true</PublishSingleFile>
     <RuntimeIdentifier Condition="'$(Configuration)' == 'Release'">win-x64</RuntimeIdentifier>
@@ -16,9 +17,9 @@
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/griffeye/videoplayer</PackageProjectUrl>
     <RepositoryUrl>https://github.com/griffeye/videoplayer</RepositoryUrl>
-    <Version>7.0.1</Version>
+    <Version>7.1.0</Version>
     <ApplicationIcon>griffeye-icon-64x64.ico</ApplicationIcon>
-    <TargetFramework>net6.0-windows</TargetFramework>
+    <TargetFramework>net7.0-windows</TargetFramework>
     <OutputType>Exe</OutputType>
   </PropertyGroup>
   <ItemGroup>
