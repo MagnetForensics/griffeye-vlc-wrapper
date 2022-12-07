@@ -6,7 +6,7 @@
     <SelfContained Condition="'$(Configuration)' == 'Release'">true</SelfContained>
     <PublishTrimmed Condition="'$(Configuration)' == 'Release'">true</PublishTrimmed>
     <TrimMode Condition="'$(Configuration)' == 'Release'">partial</TrimMode>
-    <PublishReadyToRun Condition="'$(Configuration)' == 'Release'">true</PublishReadyToRun>
+    <PublishReadyToRun Condition="'$(Configuration)' == 'Release'">false</PublishReadyToRun><!-- This does not play nice with common dll:s that are not ReadyToRun -->
     <PublishSingleFile Condition="'$(Configuration)' == 'Release'">true</PublishSingleFile>
     <RuntimeIdentifier Condition="'$(Configuration)' == 'Release'">win-x64</RuntimeIdentifier>
     <SuppressTrimAnalysisWarnings Condition="'$(Configuration)' == 'Release'">true</SuppressTrimAnalysisWarnings>
@@ -17,7 +17,7 @@
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/griffeye/videoplayer</PackageProjectUrl>
     <RepositoryUrl>https://github.com/griffeye/videoplayer</RepositoryUrl>
-    <Version>7.1.0</Version>
+    <Version>7.1.1</Version>
     <ApplicationIcon>griffeye-icon-64x64.ico</ApplicationIcon>
     <TargetFramework>net7.0-windows</TargetFramework>
     <OutputType>Exe</OutputType>
