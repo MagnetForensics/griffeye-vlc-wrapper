@@ -12,18 +12,15 @@
         <Authors>Robin Andersson, Adam Sällergård</Authors>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
         <PackageLicenseExpression></PackageLicenseExpression>
-        <Version>7.1.1</Version>
+        <Version>7.2.0</Version>
     </PropertyGroup>
-
     <ItemGroup>
       <PackageReference Include="StreamJsonRpc" Version="2.10.44" />
     </ItemGroup>
-
     <ItemGroup>
       <None Include="LICENSE">
         <Pack>True</Pack>
         <PackagePath></PackagePath>
       </None>
     </ItemGroup>
-
 </Project>

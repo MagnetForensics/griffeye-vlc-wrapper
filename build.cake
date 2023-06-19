@@ -81,7 +81,7 @@ Task("Pack-Wrapper")
 		 MSBuildSettings = new DotNetMSBuildSettings()
 	};
 	publishSettings.MSBuildSettings.Properties.Add("Platform", new [] {"x64"});
-	DotNetPublish(wrapperProject,publishSettings);
+	DotNetPublish(wrapperProject, publishSettings);
 
 	var packSettings = new DotNetPackSettings
 	{

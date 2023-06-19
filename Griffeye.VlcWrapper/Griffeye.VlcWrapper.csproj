@@ -10,14 +10,13 @@
     <PublishSingleFile Condition="'$(Configuration)' == 'Release'">true</PublishSingleFile>
     <RuntimeIdentifier Condition="'$(Configuration)' == 'Release'">win-x64</RuntimeIdentifier>
     <SuppressTrimAnalysisWarnings Condition="'$(Configuration)' == 'Release'">true</SuppressTrimAnalysisWarnings>
-    <IncludeAllContentForSelfExtract Condition="'$(Configuration)' == 'Release'">true</IncludeAllContentForSelfExtract>
     <Authors>Robin Andersson, Adam Sällergård</Authors>
     <Company>Griffeye Technologies</Company>
     <Product>VlcWrapper</Product>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/griffeye/videoplayer</PackageProjectUrl>
     <RepositoryUrl>https://github.com/griffeye/videoplayer</RepositoryUrl>
-    <Version>7.1.1</Version>
+    <Version>7.2.0</Version>
     <ApplicationIcon>griffeye-icon-64x64.ico</ApplicationIcon>
     <TargetFramework>net7.0-windows</TargetFramework>
     <OutputType>Exe</OutputType>
