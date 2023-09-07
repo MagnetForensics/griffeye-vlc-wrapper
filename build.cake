@@ -10,7 +10,7 @@ var configuration = Argument("configuration", "Release");
 //////////////////////////////////////////////////////////////////////
 
 var artifactsDir = Directory("./artifacts");
-var publishDir = artifactsDir + Directory("publish");
+var publishDir =  Directory("./publish");
 var targetRuntime = "win-x64";
 var targetFramework = "net7.0-windows";
 
@@ -26,6 +26,8 @@ Task("Clean")
 	.Does(() => 
 {
 	CleanDirectory(artifactsDir);
+	CleanDirectory(publishDir);
+	CleanDirectory("test-results");
 	CleanDirectories("./*/bin");
 	CleanDirectories("./*/obj");
 });
@@ -50,7 +52,6 @@ Task("Build")
 		Configuration = configuration,
 		NoRestore = true,
 	});
-
 });
 
 Task("Pack-Contract")
@@ -106,8 +107,8 @@ Task("Run-Unit-Tests")
 			new DotNetTestSettings()
 			{
 				Configuration = "Release",
-				Loggers = new[]{"trx"},
-				ResultsDirectory = artifactsDir,
+				Loggers = new[] { "trx" },
+				ResultsDirectory = "test-results",
 				NoBuild = true
 			});
 	}

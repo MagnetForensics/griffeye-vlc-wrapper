@@ -1,0 +1,41 @@
+trigger:
+  - master
+  
+pool:
+  name: WindowsVMSS
+
+variables:
+- group: NuGetPushCredentials
+
+steps:
+# Checkout and run script for setting up build agent
+- checkout: git://Analyze/Pipelines
+- powershell: Pipelines/SetupAgent.ps1
+
+- checkout: self
+  clean: true
+  lfs: true
+  fetchDepth: 1
+  path: s # Checkout in source root folder, not a subfolder
+
+- task: PowerShell@2
+  displayName: 'Build and test'
+  inputs:
+    filePath: build.ps1
+
+- task: PublishPipelineArtifact@1
+  displayName: 'Publish NuGet Package artifacts'
+  inputs:
+    targetPath: 'artifacts'
+    artifact: 'NuGet'
+
+- powershell: dotnet nuget push artifacts\*.nupkg --skip-duplicate --source $(AnalyzePushSource) --api-key $(AnalyzeApiKey)
+  displayName: 'Push NuGet package'
+  condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))       
+
+- task: PublishTestResults@2
+  condition: always()
+  inputs:
+    searchFolder: 'test-results'
+    testResultsFiles: '*.trx'
+    testResultsFormat: VSTest

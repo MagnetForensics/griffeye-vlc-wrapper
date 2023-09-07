@@ -9,8 +9,8 @@
   </metadata>
   <files>
     <file src="Griffeye.VlcWrapper.targets" target="build" />
-    <file src="..\artifacts\publish\Griffeye.VlcWrapper.exe" target="build\VlcWrapper" />
-    <file src="..\artifacts\publish\appsettings.json" target="build\VlcWrapper" />
-    <file src="..\artifacts\publish\libvlc\**\*" target="build\VlcWrapper\libvlc" />
+    <file src="..\publish\Griffeye.VlcWrapper.exe" target="build\VlcWrapper" />
+    <file src="..\publish\appsettings.json" target="build\VlcWrapper" />
+    <file src="..\publish\libvlc\**\*" target="build\VlcWrapper\libvlc" />
   </files>
 </package>
