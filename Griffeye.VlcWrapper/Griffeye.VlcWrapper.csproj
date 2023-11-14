@@ -16,13 +16,13 @@
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/griffeye/videoplayer</PackageProjectUrl>
     <RepositoryUrl>https://github.com/griffeye/videoplayer</RepositoryUrl>
-    <Version>7.2.1</Version>
+    <Version>7.2.2</Version>
     <ApplicationIcon>griffeye-icon-64x64.ico</ApplicationIcon>
     <TargetFramework>net7.0-windows</TargetFramework>
     <OutputType>Exe</OutputType>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="LibVLCSharp" Version="3.6.6" />
+    <PackageReference Include="LibVLCSharp" Version="3.8.2" />
     <PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
@@ -35,7 +35,7 @@
     <PackageReference Include="Serilog.Settings.Configuration" Version="3.3.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
     <PackageReference Include="SSG.LocalFileStreamClient" Version="2.1.0" />
-    <PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.18" />
+    <PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.20" />
     <PackageReference Include="Serilog.Enrichers.Thread" Version="3.1.0" />
     <PackageReference Include="Serilog.Sinks.Async" Version="1.5.0" />
   </ItemGroup>

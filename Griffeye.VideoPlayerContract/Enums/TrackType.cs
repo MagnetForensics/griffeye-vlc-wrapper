@@ -1,8 +1,7 @@
-﻿namespace Griffeye.VideoPlayerContract.Enums
+﻿namespace Griffeye.VideoPlayerContract.Enums;
+
+public enum TrackType
 {
-    public enum TrackType
-    {
-        Video,
-        Audio
-    }
+    Video,
+    Audio
 }

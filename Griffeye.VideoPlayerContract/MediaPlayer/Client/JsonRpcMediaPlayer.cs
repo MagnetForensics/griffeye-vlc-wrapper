@@ -30,31 +30,28 @@ public class JsonRpcMediaPlayer : IRpcMediaPlayer
     public JsonRpcMediaPlayer(IMediaPlayer mediaPlayer)
     {
         this.mediaPlayer = mediaPlayer;
-        
+
         mediaPlayer.EndReached += (_, args) => EndReached?.Invoke(this, args);
         mediaPlayer.TimeChanged += (_, time) => TimeChanged?.Invoke(this, (time / 1000f));
         mediaPlayer.PositionChanged += (_, time) => PositionChanged?.Invoke(this, time);
         mediaPlayer.LengthChanged += (_, time) => LengthChanged?.Invoke(this, (time / 1000f));
-        mediaPlayer.VideoInfoChanged += (_, args) =>
-            VideoInfoChanged?.Invoke(this, args);
+        mediaPlayer.VideoInfoChanged += (_, args) => VideoInfoChanged?.Invoke(this, args);
         mediaPlayer.Playing += (_, args) => Playing?.Invoke(this, args);
         mediaPlayer.Paused += (_, args) => Paused?.Invoke(this, args);
-        mediaPlayer.VolumeChanged +=
-            (_, args) => VolumeChanged?.Invoke(this, args);
+        mediaPlayer.VolumeChanged += (_, args) => VolumeChanged?.Invoke(this, args);
         mediaPlayer.Muted += (_, args) => Muted?.Invoke(this, args);
         mediaPlayer.UnMuted += (_, args) => UnMuted?.Invoke(this, args);
-        mediaPlayer.MediaTracksChanged +=
-            (_, args) => MediaTracksChanged?.Invoke(this, args);
+        mediaPlayer.MediaTracksChanged += (_, args) => MediaTracksChanged?.Invoke(this, args);
     }
-    
+
     public void Dispose()
     {
         GC.SuppressFinalize(this);
-        
+
         // This proxy class is an JsonRpc instance that is Disposable
         ((IDisposable) mediaPlayer).Dispose();
     }
-    
+
     public async Task ConnectLocalFileStreamAsync(string pipeName)
     {
         await Task.Run(() => mediaPlayer.ConnectLocalFileStream(pipeName));

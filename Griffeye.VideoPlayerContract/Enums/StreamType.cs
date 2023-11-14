@@ -1,8 +1,7 @@
-﻿namespace Griffeye.VideoPlayerContract.Enums
+﻿namespace Griffeye.VideoPlayerContract.Enums;
+
+public enum StreamType
 {
-    public enum StreamType
-    {
-        File,
-        LocalFileStream
-    }
+    File,
+    LocalFileStream
 }

@@ -1,5 +1,4 @@
 using System.IO.Pipes;
-using Griffeye.VideoPlayerContract.Stream;
 using Griffeye.VideoPlayerContract.Stream.Factories;
 using Griffeye.VideoPlayerContract.Stream.Factories.Interfaces;
 using Griffeye.VlcWrapper.Models;
@@ -11,7 +10,7 @@ public class FullDuplexStreamFactory : IFullDuplexStreamFactory
     private readonly IStreamFactory streamFactory;
     private readonly string pipeInName;
     private readonly string pipeOutName;
-    
+
     public FullDuplexStreamFactory(InputData data)
     {
         streamFactory = new StreamFactory();

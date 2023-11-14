@@ -1,15 +1,14 @@
-﻿namespace Griffeye.VlcWrapper.Models
-{
-    public class InputData
-    {
-        public long Handle { get; set; }
-        public string PipeInName { get; set; }
-        public string PipeOutName { get; set; }
-        public Serilog Serilog { get; set; }
-    }
+﻿namespace Griffeye.VlcWrapper.Models;
 
-    public class Serilog
-    {
-        public string MinimumLevel { get; set; }
-    }
+public class InputData
+{
+    public long Handle { get; set; }
+    public string PipeInName { get; set; }
+    public string PipeOutName { get; set; }
+    public Serilog Serilog { get; set; }
+}
+
+public class Serilog
+{
+    public string MinimumLevel { get; set; }
 }
