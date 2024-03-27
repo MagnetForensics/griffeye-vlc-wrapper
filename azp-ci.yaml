@@ -9,8 +9,8 @@ variables:
 
 steps:
 # Checkout and run script for setting up build agent
-- checkout: git://Analyze/Pipelines
-- powershell: Pipelines/SetupAgent.ps1
+- checkout: git://Griffeye/pipelines
+- powershell: pipelines/SetupAgent.ps1
 
 - checkout: self
   clean: true
