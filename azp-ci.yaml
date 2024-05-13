@@ -6,22 +6,28 @@ pool:
 
 variables:
 - group: NuGetPushCredentials
+- group: MagnetForensics-Github
 
 steps:
-# Checkout and run script for setting up build agent
 - checkout: git://Griffeye/pipelines
 - powershell: pipelines/SetupAgent.ps1
 
 - checkout: self
   clean: true
   lfs: true
-  fetchDepth: 1
+  fetchDepth: 0
   path: s # Checkout in source root folder, not a subfolder
 
 - task: PowerShell@2
   displayName: 'Build and test'
   inputs:
     filePath: build.ps1
+
+- task: PublishTestResults@2
+  inputs:
+    searchFolder: 'test-results'
+    testResultsFiles: '*.trx'
+    testResultsFormat: VSTest
 
 - task: PublishPipelineArtifact@1
   displayName: 'Publish NuGet Package artifacts'
@@ -33,9 +39,16 @@ steps:
   displayName: 'Push NuGet package'
   condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))       
 
-- task: PublishTestResults@2
-  condition: always()
+- task: PowerShell@2
+  displayName: 'Push to GitHub'
+  condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
   inputs:
-    searchFolder: 'test-results'
-    testResultsFiles: '*.trx'
-    testResultsFormat: VSTest
+    targetType: 'inline'
+    script: |
+      git config user.email "Azure@Bot.com"
+      git config user.name "AzureDevOpsBot"
+      git remote remove github
+      git remote add github "https://$(PAT)@github.com/MagnetForensics/griffeye-vlc-wrapper.git"
+      git push --force github HEAD:master
+  env:
+    PAT: $(PAT)
