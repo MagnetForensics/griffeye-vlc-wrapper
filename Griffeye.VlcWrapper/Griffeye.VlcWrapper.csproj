@@ -16,8 +16,8 @@
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/griffeye/videoplayer</PackageProjectUrl>
     <RepositoryUrl>https://github.com/griffeye/videoplayer</RepositoryUrl>
-    <Version>7.2.2</Version>
-    <ApplicationIcon>griffeye-icon-64x64.ico</ApplicationIcon>
+    <Version>7.2.3</Version>
+    <ApplicationIcon>magnet_msymbol_color_rgb-64x64.ico</ApplicationIcon>
     <TargetFramework>net7.0-windows</TargetFramework>
     <OutputType>Exe</OutputType>
   </PropertyGroup>
