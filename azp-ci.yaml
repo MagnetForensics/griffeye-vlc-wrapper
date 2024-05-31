@@ -37,7 +37,17 @@ steps:
 
 - powershell: dotnet nuget push artifacts\*.nupkg --skip-duplicate --source $(AnalyzePushSource) --api-key $(AnalyzeApiKey)
   displayName: 'Push NuGet package'
-  condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))       
+  condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
+
+- task: NuGetCommand@2
+  displayName: "Nuget Push to Azure Feed"
+  condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
+  inputs:
+    command: 'push'
+    packagesToPush: 'artifacts\*.nupkg'
+    nuGetFeedType: 'internal'
+    publishVstsFeed: 'Griffeye/Library'
+    allowPackageConflicts: true # --skip-duplicate
 
 - task: PowerShell@2
   displayName: 'Push to GitHub'
