@@ -5,18 +5,22 @@ pool:
   name: WindowsVMSS
 
 variables:
-- group: NuGetPushCredentials
 - group: MagnetForensics-Github
 
 steps:
-- checkout: git://Griffeye/pipelines
-- powershell: pipelines/SetupAgent.ps1
-
 - checkout: self
   clean: true
   lfs: true
   fetchDepth: 0
-  path: s # Checkout in source root folder, not a subfolder
+  path: s
+
+- checkout: git://Griffeye/pipelines
+  displayName: 'Checkout pipelines'
+  clean: true
+- powershell: pipelines/SetupAgent.ps1 -nugetConfigPath $(Build.SourcesDirectory)\NuGet.Config
+  displayName: 'Setup nuget credentials'
+  env:
+    SYSTEM_ACCESSTOKEN: $(System.AccessToken)
 
 - task: PowerShell@2
   displayName: 'Build and test'
@@ -34,10 +38,6 @@ steps:
   inputs:
     targetPath: 'artifacts'
     artifact: 'NuGet'
-
-- powershell: dotnet nuget push artifacts\*.nupkg --skip-duplicate --source $(AnalyzePushSource) --api-key $(AnalyzeApiKey)
-  displayName: 'Push NuGet package'
-  condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
 
 - task: NuGetCommand@2
   displayName: "Nuget Push to Azure Feed"
