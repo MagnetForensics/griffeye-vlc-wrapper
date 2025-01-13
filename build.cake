@@ -12,7 +12,7 @@ var configuration = Argument("configuration", "Release");
 var artifactsDir = Directory("./artifacts");
 var publishDir =  Directory("./publish");
 var targetRuntime = "win-x64";
-var targetFramework = "net7.0-windows";
+var targetFramework = "net8.0-windows";
 
 var solution = "./VideoPlayer.sln";
 var contractProject = "./Griffeye.VideoPlayerContract/Griffeye.VideoPlayerContract.csproj";
@@ -23,7 +23,7 @@ var wrapperProject = "./Griffeye.VlcWrapper/Griffeye.VlcWrapper.csproj";
 //////////////////////////////////////////////////////////////////////
 
 Task("Clean")
-	.Does(() => 
+	.Does(() =>
 {
 	CleanDirectory(artifactsDir);
 	CleanDirectory(publishDir);
@@ -33,7 +33,7 @@ Task("Clean")
 });
 
 Task("Restore-NuGet-Packages")
-	.Does(() => 
+	.Does(() =>
 {
 	DotNetRestore(new DotNetRestoreSettings {
 		IgnoreFailedSources = true,
